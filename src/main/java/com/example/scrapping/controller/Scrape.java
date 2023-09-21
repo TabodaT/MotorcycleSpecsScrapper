@@ -33,7 +33,6 @@ public class Scrape {
         for (HtmlElement htmlItem : items) {
 
             HtmlElement spanPrice = ((HtmlElement) htmlItem.getFirstByXPath(".//a[@class='css-rc5s2u']"));
-//            String itemName = itemAnchor.asNormalizedText();
             String itemUrl = spanPrice.getAttribute("href");
 
 
