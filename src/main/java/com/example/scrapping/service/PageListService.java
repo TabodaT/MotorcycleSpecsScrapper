@@ -10,15 +10,11 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import static java.time.LocalTime.now;
 
 @Service
 @Slf4j
@@ -49,7 +45,7 @@ public class PageListService {
 
             // Title
             listPostingDTO.setTitle(titles.get(it).asNormalizedText());
-            System.out.println("Title:        " + listPostingDTO.getTitle());
+
             // URL
             if (firstCard) {
                 HtmlElement urlFirst = htmlItem.getFirstByXPath("//a[@class='css-rc5s2u']");
@@ -58,52 +54,23 @@ public class PageListService {
             } else {
                 listPostingDTO.setUrl(OLX_RO + divCard.getAttribute("href"));
             }
-            System.out.println("URL:          " + listPostingDTO.getUrl());
+
             // id
             listPostingDTO.setId(htmlItem.getAttribute("id"));
-            System.out.println("id:           " + htmlItem.getAttribute("id"));
+
             // price & currency
             setPriceAndCurrency(listPostingDTO, prices, it);
-            System.out.println("Price:        " + listPostingDTO.getPrice() + listPostingDTO.getCurrency());
-            System.out.println("Negociabil:   " + listPostingDTO.getNegociabil());
+
             // location and date
             try {
                 setLocationAndDate(listPostingDTO, locationsAndDates, it);
-
             } catch (Exception e){
                 log.warn("Date parse exception: "+ e);
             }
-            System.out.println("Location:     " + listPostingDTO.getLocation());
-            System.out.println("Date:         " + listPostingDTO.getDate());
-            System.out.println("Reactualizat: " + listPostingDTO.getReactualizat());
-
-
-            System.out.println("\n");
-
-//            Iterable<DomNode> nodes = htmlItem.getChildren();
-//            for (DomNode node : nodes) {
-//
-//                HtmlElement titleElement = node.get;
-//                System.out.printf(titleElement.asNormalizedText());
-//
-//
-////                Iterable<HtmlElement> elements = node.getHtmlElementDescendants();
-////                System.out.println("ELEMENTS:\n");
-////                for (HtmlElement el : elements) {
-////                    System.out.println(el);
-////                }
-//                System.out.println("\n");
-//
-//            }
-
-
-//            HtmlElement titleElement = htmlItem.getFirstByXPath("//h6");
-//            listPostingDTO.setTitle(titleElement.asNormalizedText());
-            // id
-
 
             listPostingDTOS.add(listPostingDTO);
             it++;
+            System.out.println(listPostingDTO + "\n");
         }
         System.out.println("DONE");
     }
@@ -137,26 +104,49 @@ public class PageListService {
         String locationDateReactualizat = locationsAndDates.get(it).asNormalizedText();
         String location = locationDateReactualizat.substring(0,locationDateReactualizat.indexOf(" "));
 
-        String date = "";
-        if (locationDateReactualizat.contains(AZI)){
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DATE_FORMATTER);
+        String date;
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DATE_FORMATTER);
+        if (locationDateReactualizat.toLowerCase().contains(AZI)){
             LocalDateTime now = LocalDateTime.now();
             date = dtf.format(now);
         } else {
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DATE_FORMATTER);
-            LocalDateTime now = LocalDateTime.now();
-            date = dtf.format(now);
+            date = getDateString(locationDateReactualizat);
         }
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
         listPostingDTO.setDate(formatter.parse(date));
-
-
-
         listPostingDTO.setLocation(location);
         listPostingDTO.setReactualizat(locationDateReactualizat.toLowerCase().contains(REACTUALIZAT));
+    }
 
-        System.out.println(location);
+    private String getDateString(String locationDateReactualizat){
+        String dateString = "";
+        for(Character c : locationDateReactualizat.toCharArray()){
+            if(Character.isDigit(c)){
+                dateString = locationDateReactualizat.substring(locationDateReactualizat.indexOf(c));
+                break;
+            }
+        }
+        String[] dayMonthYear = dateString.split(" ");
+        String day = dayMonthYear[0];
+        String monthLiteral = dayMonthYear[1];
+        String year = dayMonthYear[2];
+        String month = switch (monthLiteral) {
+            case "ianuarie" -> "01";
+            case "februarie" -> "02";
+            case "martie" -> "03";
+            case "aprile" -> "04";
+            case "mai" -> "05";
+            case "iunie" -> "06";
+            case "iulie" -> "07";
+            case "august" -> "08";
+            case "septembrie" -> "09";
+            case "octombrie" -> "10";
+            case "noiembrie" -> "11";
+            case "decembrie" -> "12";
+            default -> "";
+        };
 
+        return day+"-"+month+"-"+year;
     }
 
 }
