@@ -14,7 +14,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("scrape")
 @Slf4j
-public class Scraper {
+public class ScraperController {
 
     @Autowired
     PageListService pageListService;

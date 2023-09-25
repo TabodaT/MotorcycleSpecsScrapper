@@ -5,6 +5,8 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -25,11 +27,15 @@ public class PageListService {
     private static final String DATE_FORMATTER = "dd-MM-yyyy";
     List<ListPostingDTO> listPostingDTOS = new ArrayList<>();
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     public void getListOfPostsFromPage() throws IOException {
         WebClient client = new WebClient();
         client.getOptions().setCssEnabled(false);
         client.getOptions().setJavaScriptEnabled(false);
-        String searchUrl = OLX_RO + "/oferte/q-klr-650/?currency=EUR";
+//        String searchUrl = OLX_RO + "/oferte/q-klr-650/?currency=EUR";
+        String searchUrl = OLX_RO + "/auto-masini-moto-ambarcatiuni/motociclete/piatra-neamt/q-honda/?currency=EUR";
 
         HtmlPage page = client.getPage(searchUrl);
         List<HtmlElement> items = page.getByXPath("//div[@data-cy='l-card']");
@@ -56,7 +62,7 @@ public class PageListService {
             }
 
             // id
-            listPostingDTO.setId(htmlItem.getAttribute("id"));
+            listPostingDTO.setId(Integer.parseInt(htmlItem.getAttribute("id")));
 
             // price & currency
             setPriceAndCurrency(listPostingDTO, prices, it);
@@ -102,7 +108,7 @@ public class PageListService {
 
     private void setLocationAndDate(ListPostingDTO listPostingDTO, List<HtmlElement> locationsAndDates, int it) throws ParseException {
         String locationDateReactualizat = locationsAndDates.get(it).asNormalizedText();
-        String location = locationDateReactualizat.substring(0,locationDateReactualizat.indexOf(" "));
+        String location = getLocation(locationDateReactualizat);
 
         String date;
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DATE_FORMATTER);
@@ -120,8 +126,13 @@ public class PageListService {
 
     private String getDateString(String locationDateReactualizat){
         String dateString = "";
+        int iterSect = 0;
         for(Character c : locationDateReactualizat.toCharArray()){
             if(Character.isDigit(c)){
+                if(locationDateReactualizat.toLowerCase().contains("sectorul") && (iterSect == 0)) {
+                    iterSect++;
+                    continue;
+                }
                 dateString = locationDateReactualizat.substring(locationDateReactualizat.indexOf(c));
                 break;
             }
@@ -147,6 +158,32 @@ public class PageListService {
         };
 
         return day+"-"+month+"-"+year;
+    }
+
+    private String getLocation(String locationDateReactualizat){
+        String location;
+        if (locationDateReactualizat.toLowerCase().contains("bucuresti")){
+            return "Bucuresti";
+        }
+        location = locationDateReactualizat.substring(0,locationDateReactualizat.indexOf(" - ")).trim();
+        return location;
+    }
+
+
+    public void run() throws Exception {
+        String sql = "INSERT INTO user (id, fullname, email, password)  VALUES (?, ?, ?, ?)";
+
+        int result = jdbcTemplate.update(sql,"1", "name1", "email1", "passw1");
+
+//        jdbcTemplate.execute();
+
+        if (result>0){
+            System.out.println("A new row has been inserted");
+        } else {
+            System.out.println("Didn't insert");
+        }
+
+
     }
 
 }

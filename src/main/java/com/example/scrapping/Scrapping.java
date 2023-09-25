@@ -1,5 +1,6 @@
 package com.example.scrapping;
 
+import com.example.scrapping.config.MyDataBaseService;
 import com.example.scrapping.service.PageListService;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -13,11 +14,14 @@ import java.io.IOException;
 public class Scrapping {
 //	@Autowired
 //	PageListService pageListService;
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		PageListService pageListService = new PageListService();
+		MyDataBaseService myDataBaseService = new MyDataBaseService();
 
 		SpringApplication.run(Scrapping.class, args);
-		pageListService.getListOfPostsFromPage();
+//		pageListService.getListOfPostsFromPage();
+//		pageListService.run();
+		myDataBaseService.run();
 
 	}
 

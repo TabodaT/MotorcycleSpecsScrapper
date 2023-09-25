@@ -11,7 +11,7 @@ import java.util.Date;
 public class ListPostingDTO {
     private String title;
     private String url;
-    private String id;
+    private int id;
     private int price;
     private String currency;
     private String location;
