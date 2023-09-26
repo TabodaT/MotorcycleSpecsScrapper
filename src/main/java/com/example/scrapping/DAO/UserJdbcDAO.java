@@ -1,5 +1,6 @@
 package com.example.scrapping.DAO;
 
+import com.example.scrapping.mappers.UserRowMapper;
 import com.example.scrapping.model.User;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,7 +21,8 @@ public class UserJdbcDAO implements DAO<User>{
     @Override
     public List<User> list() {
         String sql = "SELECT id, fullname, email, password from user";
-        return null;
+        UserRowMapper userRowMapper = new UserRowMapper();
+        return jdbcTemplate.query(sql,userRowMapper);
     }
 
     @Override
