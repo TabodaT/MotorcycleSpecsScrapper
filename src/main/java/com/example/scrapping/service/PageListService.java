@@ -27,8 +27,7 @@ public class PageListService {
     private static final String DATE_FORMATTER = "dd-MM-yyyy";
     List<ListPostingDTO> listPostingDTOS = new ArrayList<>();
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+//    private UserDaoImpl userDAO = new UserDaoImpl();
 
     public void getListOfPostsFromPage() throws IOException {
         WebClient client = new WebClient();
@@ -70,8 +69,8 @@ public class PageListService {
             // location and date
             try {
                 setLocationAndDate(listPostingDTO, locationsAndDates, it);
-            } catch (Exception e){
-                log.warn("Date parse exception: "+ e);
+            } catch (Exception e) {
+                log.warn("Date parse exception: " + e);
             }
 
             listPostingDTOS.add(listPostingDTO);
@@ -112,7 +111,7 @@ public class PageListService {
 
         String date;
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DATE_FORMATTER);
-        if (locationDateReactualizat.toLowerCase().contains(AZI)){
+        if (locationDateReactualizat.toLowerCase().contains(AZI)) {
             LocalDateTime now = LocalDateTime.now();
             date = dtf.format(now);
         } else {
@@ -124,12 +123,12 @@ public class PageListService {
         listPostingDTO.setReactualizat(locationDateReactualizat.toLowerCase().contains(REACTUALIZAT));
     }
 
-    private String getDateString(String locationDateReactualizat){
+    private String getDateString(String locationDateReactualizat) {
         String dateString = "";
         int iterSect = 0;
-        for(Character c : locationDateReactualizat.toCharArray()){
-            if(Character.isDigit(c)){
-                if(locationDateReactualizat.toLowerCase().contains("sectorul") && (iterSect == 0)) {
+        for (Character c : locationDateReactualizat.toCharArray()) {
+            if (Character.isDigit(c)) {
+                if (locationDateReactualizat.toLowerCase().contains("sectorul") && (iterSect == 0)) {
                     iterSect++;
                     continue;
                 }
@@ -157,33 +156,28 @@ public class PageListService {
             default -> "";
         };
 
-        return day+"-"+month+"-"+year;
+        return day + "-" + month + "-" + year;
     }
 
-    private String getLocation(String locationDateReactualizat){
+    private String getLocation(String locationDateReactualizat) {
         String location;
-        if (locationDateReactualizat.toLowerCase().contains("bucuresti")){
+        if (locationDateReactualizat.toLowerCase().contains("bucuresti")) {
             return "Bucuresti";
         }
-        location = locationDateReactualizat.substring(0,locationDateReactualizat.indexOf(" - ")).trim();
+        location = locationDateReactualizat.substring(0, locationDateReactualizat.indexOf(" - ")).trim();
         return location;
     }
 
 
-    public void run() throws Exception {
-        String sql = "INSERT INTO user (id, fullname, email, password)  VALUES (?, ?, ?, ?)";
 
-        int result = jdbcTemplate.update(sql,"1", "name1", "email1", "passw1");
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
-//        jdbcTemplate.execute();
+    public List<String> getAllUserNames(){
+        List<String> usernameList = new ArrayList<>();
 
-        if (result>0){
-            System.out.println("A new row has been inserted");
-        } else {
-            System.out.println("Didn't insert");
-        }
-
-
+        usernameList.addAll(jdbcTemplate.queryForList("SELECT fullname from user;", String.class));
+        return usernameList;
     }
 
 }
