@@ -27,7 +27,8 @@ public class PageListService {
     private static final String DATE_FORMATTER = "dd-MM-yyyy";
     List<ListPostingDTO> listPostingDTOS = new ArrayList<>();
 
-//    private UserDaoImpl userDAO = new UserDaoImpl();
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     public void getListOfPostsFromPage() throws IOException {
         WebClient client = new WebClient();
@@ -168,15 +169,12 @@ public class PageListService {
         return location;
     }
 
-
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
     public List<String> getAllUserNames(){
         List<String> usernameList = new ArrayList<>();
 
         usernameList.addAll(jdbcTemplate.queryForList("SELECT fullname from user;", String.class));
+
+        usernameList.forEach(System.out::println);
         return usernameList;
     }
 

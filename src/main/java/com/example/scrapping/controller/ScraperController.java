@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping(path="/scrape")
+@RequestMapping(path = "/scrape")
 @Slf4j
 public class ScraperController {
 
@@ -25,21 +25,20 @@ public class ScraperController {
     UserRepository userRepository;
 
     @GetMapping
-    public List<String> testApi(){
+    public List<String> testApi() {
         return pageListService.getAllUserNames();
     }
 
     @GetMapping("/getusernames")
-    public List<String> getAllUserNames(){
+    public List<String> getAllUserNames() {
         return userRepository.getAllUserNames();
     }
-
 
     @GetMapping("/scrape-a-page")
     public ResponseEntity<String> scrapeAPage() {
         try {
             pageListService.getListOfPostsFromPage();
-        } catch (IOException e){
+        } catch (IOException e) {
             log.warn("Couldn't get page " + e);
             return new ResponseEntity<>("Couldn't get page", HttpStatus.FAILED_DEPENDENCY);
         }
