@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class MotoSpecsScrapper {
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(MotoSpecsScrapper.class, args);
+		// testing commits 
 	}
 }
 
