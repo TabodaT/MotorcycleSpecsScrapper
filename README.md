@@ -1,2 +1,2 @@
-# OlxMotoScraper
-This app scrapes olx for motorcycles
+# MotorcycleSpecs
+This app scrapes mototrcycles data and metrics from specific websites
