@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class ListPostingDTO {
+public class ListPostingDTO { // to be deleted
     private String title;
     private String url;
     private int id;

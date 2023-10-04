@@ -13,6 +13,6 @@ public class RunnerWithSpring implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-		pageListService.getAllUserNames();
+		pageListService.startScrapping();
     }
 }

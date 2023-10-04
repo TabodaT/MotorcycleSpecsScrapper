@@ -24,10 +24,10 @@ public class ScraperController {
     @Autowired
     UserRepository userRepository;
 
-    @GetMapping
-    public List<String> testApi() {
-        return pageListService.getAllUserNames();
-    }
+//    @GetMapping
+//    public List<String> testApi() {
+//        return pageListService.getAllUserNames();
+//    }
 
     @GetMapping("/getusernames")
     public List<String> getAllUserNames() {
@@ -36,12 +36,7 @@ public class ScraperController {
 
     @GetMapping("/scrape-a-page")
     public ResponseEntity<String> scrapeAPage() {
-        try {
-            pageListService.getListOfPostsFromPage();
-        } catch (IOException e) {
-            log.warn("Couldn't get page " + e);
-            return new ResponseEntity<>("Couldn't get page", HttpStatus.FAILED_DEPENDENCY);
-        }
+        pageListService.startScrapping();
         return new ResponseEntity<>("WORKED!", HttpStatus.ACCEPTED);
     }
 }

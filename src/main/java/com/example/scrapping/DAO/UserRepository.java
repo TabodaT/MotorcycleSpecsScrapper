@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class UserRepository {
+public class UserRepository { // to be deleted
     @Autowired
     JdbcTemplate jdbcTemplate;
 

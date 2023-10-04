@@ -1,7 +1,7 @@
 package com.example.scrapping.model;
 
 
-public class User {
+public class User {  // to be deleted
     private int id;
     private String fullname;
     private String email;
