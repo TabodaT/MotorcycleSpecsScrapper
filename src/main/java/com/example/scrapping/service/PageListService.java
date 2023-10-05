@@ -19,15 +19,17 @@ public class PageListService {
     private static final String MOTORCYCLESPECS_CO_ZA = "https://www.motorcyclespecs.co.za/";
 
     private static final String BIKES = "bikes/";
-    List<ListPostingDTO> listPostingDTOS = new ArrayList<>(); // to be deleted
-    List<Manufacturer> listOfManufacturers = new ArrayList<>();
-//    Map<String,String> listOfManufacturers = new TreeMap<>();
+    private List<ListPostingDTO> listPostingDTOS = new ArrayList<>(); // to be deleted
+    private List<Manufacturer> listOfManufacturers = new ArrayList<>();
+    //    Map<String,String> listOfManufacturers = new TreeMap<>();
+    private static final List<String> listOfMotorcyclesWithDifferentUrlFormat = new ArrayList<>((Arrays.asList("aprilia")));
+    private static final List<String> listOfLinksToIgnore = new ArrayList<>((Arrays.asList("Home","Manufacturer","Contact","Previous","Classic Bikes")));
 
     public void startScrapping() {
         try {
             getListOfManufacturers();
             getModels();
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Something is wrong: " + e);
         }
 
@@ -38,32 +40,54 @@ public class PageListService {
         client.getOptions().setCssEnabled(false);
         client.getOptions().setJavaScriptEnabled(false);
 
-        for (Manufacturer manufacturer : listOfManufacturers){
+        for (Manufacturer manufacturer : listOfManufacturers) {
+            if (!manufacturer.getName().equals("AJS")) continue;    // to be deleted
+
             HtmlPage page = client.getPage(manufacturer.getUrl());
+            String nextButtonUrl = getNextButtonUrl(page);
+            boolean canScrapPage = true;
+            while (canScrapPage) {
+                List<HtmlElement> items = page.getByXPath("//td");
+                for (HtmlElement item : items) {
+                    HtmlElement anchor = item.getFirstByXPath(".//font/a");
 
-//            List<HtmlElement> items = page.getByXPath("//td[@class='auto-style4']");
-            List<HtmlElement> items = page.getByXPath("//a[@target='_self']");
-            boolean startRecordingModels = false;
-            for (HtmlElement htmlElement : items){
-//                HtmlElement anchor = htmlElement.getFirstByXPath("//a");
+                    if (anchor == null) anchor = item.getFirstByXPath(".//p/a");
+                    if (anchor == null) anchor = item.getFirstByXPath(".//span/a");
+                    if (anchor == null) anchor = item.getFirstByXPath(".//a");
 
-                String modelName = htmlElement.getTextContent();
-                if (modelName.contains("Home")) {
-                    startRecordingModels = true;
-                    continue;
+                    if (anchor != null) {
+                        String modelName = anchor.getTextContent();
+                        modelName = modelName.replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "").replaceAll(" ","").trim();
+                        if (listOfLinksToIgnore.contains(modelName)) continue;
+                        String semiLink = anchor.getAttribute("href");
+                        String url = composeUrlOfModel(manufacturer, semiLink);
+                        Model model = new Model(modelName, url);
+                        manufacturer.addModel(model);
+                    }
                 }
-                if (!startRecordingModels) continue;
-
-                String semiLink = htmlElement.getAttribute("href");
-                String url = composeUrlOfModel(manufacturer.getUrl(),semiLink);
-                Model model = new Model(modelName, url);
-                manufacturer.getModelsList().add(model);
-
-                System.out.println(semiLink);
+                canScrapPage = !nextButtonUrl.isEmpty();
+                if (canScrapPage)
+                    page = client.getPage(nextButtonUrl);
+                nextButtonUrl = getNextButtonUrl(page);
+                manufacturer.printModels();
+                System.out.println("HERE ---------------------------------");
             }
+            System.out.println("Here1");
         }
+        System.out.println("Here2");
+    }
 
-
+    private String getNextButtonUrl(HtmlPage page) {
+        List<HtmlElement> items = page.getByXPath("//a");
+        String nextButtonUrl = "";
+        for (HtmlElement htmlElement : items) {
+            String textContent = htmlElement.getTextContent();
+            if (!textContent.equals("Next")) continue;
+            String semiLink = htmlElement.getAttribute("href");
+            nextButtonUrl = MOTORCYCLESPECS_CO_ZA + BIKES + semiLink;
+            break;
+        }
+        return nextButtonUrl;
     }
 
     private void getListOfManufacturers() throws IOException {
@@ -77,9 +101,9 @@ public class PageListService {
 
         Iterable<DomElement> linksOfManuf = theDivWithManuf.getChildElements();
         boolean startRecordingManufacturersLinks = false;
-        for (DomElement element : linksOfManuf){
+        for (DomElement element : linksOfManuf) {
             String semiLink = element.getAttribute("href");
-            if (semiLink.contains("AJP.htm")){
+            if (semiLink.contains("AJP.htm")) {
                 startRecordingManufacturersLinks = true;
             }
 
@@ -140,13 +164,18 @@ public class PageListService {
         }
     }
 
-    private String composeUrlOfModel(String manufUrl, String semiLink){
-        String url = semiLink.substring(semiLink.lastIndexOf("/")+1);
-        String prefix = manufUrl.substring(0,manufUrl.lastIndexOf(".")) + "/";
+    private String composeUrlOfModel(Manufacturer manufacturer, String semiLink) {
+        String manufUrl = manufacturer.getUrl();
+        String url = semiLink.substring(semiLink.lastIndexOf("/") + 1);
+        String prefix = manufUrl.substring(0, manufUrl.lastIndexOf(".")) + "/";
+        if (listOfMotorcyclesWithDifferentUrlFormat.contains(manufacturer.getName().toLowerCase())) {
+            prefix = prefix.toLowerCase();
+        }
         return prefix.replaceFirst("bikes", "model") + url;
     }
-    private String composeUrlOfManuf(String semiLink){
-        String manuf = semiLink.substring(semiLink.lastIndexOf("/")+1);
+
+    private String composeUrlOfManuf(String semiLink) {
+        String manuf = semiLink.substring(semiLink.lastIndexOf("/") + 1);
         return MOTORCYCLESPECS_CO_ZA + BIKES + manuf;
     }
 
