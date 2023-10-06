@@ -15,6 +15,10 @@ public class Manufacturer extends MotoListing {
         this.modelsList = new HashSet<>();
     }
 
+    public HashSet<Model> getModelsList(){
+        return new HashSet<>(this.modelsList);
+    }
+
     public void addModel(Model model) {
         if (model.getUrl().isEmpty() || model.getName().isEmpty()) {
             return;

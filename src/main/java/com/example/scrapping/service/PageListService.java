@@ -8,6 +8,7 @@ import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -25,6 +26,8 @@ public class PageListService {
     private static final List<String> listOfMotorcyclesWithDifferentUrlFormat = new ArrayList<>((Arrays.asList("aprilia")));
     private static final List<String> listOfLinksToIgnore = new ArrayList<>((Arrays.asList("Home","Manufacturer","Contact","Previous","Classic Bikes")));
 
+    @Autowired
+    ModelDetailsService modelDetailsService;
     public void startScrapping() {
         try {
             getListOfManufacturers();
@@ -41,13 +44,17 @@ public class PageListService {
         client.getOptions().setJavaScriptEnabled(false);
 
         for (Manufacturer manufacturer : listOfManufacturers) {
-            if (!manufacturer.getName().equals("AJS")) continue;    // to be deleted
+            if (!manufacturer.getName().equals("BMW")) continue;    // to be deleted
 
             HtmlPage page = client.getPage(manufacturer.getUrl());
             String nextButtonUrl = getNextButtonUrl(page);
             boolean canScrapPage = true;
+            int pageCounter = 1; // to be deleted
             while (canScrapPage) {
+                System.out.println("--------------------- Page: "+pageCounter+" ---------------------"); // to be deleted
+                pageCounter++; // to be deleted
                 List<HtmlElement> items = page.getByXPath("//td");
+                int modelPerPageCounter = 1;
                 for (HtmlElement item : items) {
                     HtmlElement anchor = item.getFirstByXPath(".//font/a");
 
@@ -63,18 +70,26 @@ public class PageListService {
                         String url = composeUrlOfModel(manufacturer, semiLink);
                         Model model = new Model(modelName, url);
                         manufacturer.addModel(model);
+                        if (model.getUrl().isEmpty() || model.getName().isEmpty()) { // to be deleted
+                            continue;
+                        }
+                        System.out.println(modelPerPageCounter + ". " + model); // to be deleted
+                        modelPerPageCounter++; // to be deleted
                     }
                 }
                 canScrapPage = !nextButtonUrl.isEmpty();
-                if (canScrapPage)
+                if (canScrapPage) {
                     page = client.getPage(nextButtonUrl);
-                nextButtonUrl = getNextButtonUrl(page);
-                manufacturer.printModels();
-                System.out.println("HERE ---------------------------------");
+                    nextButtonUrl = getNextButtonUrl(page);
+                }
+//                manufacturer.printModels();
+                System.out.println("HERE ---------------------------------"); // to be deleted
             }
-            System.out.println("Here1");
+            modelDetailsService.getModelDetails(manufacturer);
+
+            System.out.println("Here1");// to be deleted
         }
-        System.out.println("Here2");
+        System.out.println("Here2");// to be deleted
     }
 
     private String getNextButtonUrl(HtmlPage page) {
