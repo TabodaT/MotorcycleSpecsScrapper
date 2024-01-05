@@ -28,6 +28,8 @@ public class PageListService {
 
     @Autowired
     ModelDetailsService modelDetailsService;
+
+    // START HERE
     public void startScrapping() {
         try {
             getListOfManufacturers();

@@ -30,7 +30,7 @@ public class ModelDetailsService {
         int nrOfModels = manufacturer.getModelsList().size();
 
         for (Model model : manufacturer.getModelsList()) {
-            System.out.println(modelsCounter+"/"+nrOfModels + model.getName());
+            System.out.println(modelsCounter+"/"+nrOfModels + ": " + model.getName());
             modelsCounter++;
 //            if (!model.getName().equals("C 400GT")) continue;    // to be deleted
 
