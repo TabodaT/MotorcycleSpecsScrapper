@@ -1,0 +1,31 @@
+USE `motorcycles`;
+
+CREATE TABLE `moto_models` (
+  `id` int NOT NULL,
+  `make` varchar(50) NOT NULL,
+  `model` varchar(50) NOT NULL,
+  `engine` varchar(50) NOT NULL,
+  `capacity` varchar(50) NOT NULL,
+  `power` varchar(50) NOT NULL,
+  `clutch` varchar(50) NOT NULL,
+  `torque` varchar(50) NOT NULL,
+  `abs` BOOLEAN,
+  `front_brakes` varchar(50) NOT NULL,
+  `rear_brakes` varchar(50) NOT NULL,
+  `transmission` varchar(50) NOT NULL,
+  `final_drive` varchar(50) NOT NULL,
+  `seat_height` varchar(50) NOT NULL,
+  `dry_weight` varchar(50) NOT NULL,
+  `wet_weight` varchar(50) NOT NULL,
+  `fuel_capacity` varchar(50) NOT NULL,
+  `reserve` varchar(50) NOT NULL,
+  `consumption` varchar(50) NOT NULL,
+  `range` varchar(50) NOT NULL,
+  `cooling_system` varchar(50) NOT NULL,
+  `ignition` varchar(50) NOT NULL,
+  `oil_capacity` varchar(50) NOT NULL,
+  `power_to_weight_ratio` varchar(50) NOT NULL,
+  `top_speed` varchar(50) NOT NULL,
+  `url` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
