@@ -28,17 +28,28 @@ public class PageListService {
 
     @Autowired
     ModelDetailsService modelDetailsService;
+    @Autowired
+    StoreModelsToDataBaseService storeModelsToDataBaseService;
 
     // START HERE
     public void startScrapping() {
         try {
+//            storeModelsToDataBaseService.updateUserId();
             getListOfManufacturers();
             getModels();
+            getModelsDetails(); // no need for now
         } catch (Exception e) {
             log.error("Something is wrong: " + e);
         }
 
     }
+
+    private void getModelsDetails() throws IOException {
+        for (Manufacturer manufacturer : listOfManufacturers) {
+        modelDetailsService.getModelDetails(manufacturer);
+        }
+    }
+
 
     private void getModels() throws IOException {
         WebClient client = new WebClient();
@@ -58,6 +69,7 @@ public class PageListService {
                 List<HtmlElement> items = page.getByXPath("//td");
                 int modelPerPageCounter = 1;
                 for (HtmlElement item : items) {
+                    if(pageCounter!=9) continue; // to be deleted
                     HtmlElement anchor = item.getFirstByXPath(".//font/a");
 
                     if (anchor == null) anchor = item.getFirstByXPath(".//p/a");
@@ -79,6 +91,7 @@ public class PageListService {
                         modelPerPageCounter++; // to be deleted
                     }
                 }
+                if(pageCounter==9) break; // to be deleted
                 canScrapPage = !nextButtonUrl.isEmpty();
                 if (canScrapPage) {
                     page = client.getPage(nextButtonUrl);
@@ -87,7 +100,7 @@ public class PageListService {
 //                manufacturer.printModels();
                 System.out.println("HERE ---------------------------------"); // to be deleted
             }
-            modelDetailsService.getModelDetails(manufacturer);
+//            modelDetailsService.getModelDetails(manufacturer);
 
             System.out.println("Here1");// to be deleted
         }
@@ -128,9 +141,11 @@ public class PageListService {
 
             String manufName = element.getTextContent();
             if (manufName.isBlank() || manufName.contains("Complete Manufacturer")) continue;
+            if(!manufName.equals("BMW")) continue; // to be deleted
 
             Manufacturer manufacturer = new Manufacturer(manufName, composeUrlOfManuf(semiLink));
             listOfManufacturers.add(manufacturer);
+            if(manufName.equals("BMW")) break; // to be deleted
         }
 //        listOfManufacturers.forEach(System.out::println);
 //        System.out.println("Here");

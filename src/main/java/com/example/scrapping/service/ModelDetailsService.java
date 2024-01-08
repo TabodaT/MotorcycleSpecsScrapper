@@ -17,9 +17,11 @@ import java.util.List;
 @Slf4j
 public class ModelDetailsService {
     private List<String> listOfSpecName;
+    private List<String> listOfSpecValue;
 
     public ModelDetailsService() {
         this.listOfSpecName = new ArrayList<>();
+        this.listOfSpecValue = new ArrayList<>();
     }
 
     public void getModelDetails(Manufacturer manufacturer) throws IOException {
@@ -55,15 +57,25 @@ public class ModelDetailsService {
                         }
                         String cellText = cell.getTextContent().replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "").replaceAll(" ","").trim();
                         if (cellNr == 1) {
-                            if (!listOfSpecName.contains(cellText))
-                                listOfSpecName.add(cellText);
+                            listOfSpecName.add(cellText);
+                        } else {
+                            listOfSpecValue.add(cellText);
                         }
 //                        System.out.println(cell.getTextContent());
                         cellNr++;
                     }
                 }
             }
+            printScrapedTable();
         }
         listOfSpecName.forEach(System.out::println);
+    }
+
+    private void printScrapedTable(){
+        System.out.println("total rows: "+listOfSpecValue.size());
+        for (int i=0; i<listOfSpecValue.size(); i++){
+            System.out.println((i+1)+".\t"+listOfSpecName.get(i)+"\t"+listOfSpecValue.get(i));
+        }
+        System.out.println("--------------------------");
     }
 }

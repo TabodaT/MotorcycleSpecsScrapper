@@ -1,7 +1,7 @@
 USE `motorcycles`;
 
 CREATE TABLE `moto_models` (
-  `id` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
   `make` varchar(50) NOT NULL,
   `model` varchar(50) NOT NULL,
   `engine` varchar(50),
