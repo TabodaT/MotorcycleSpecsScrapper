@@ -1,5 +1,6 @@
 package com.example.scrapping.service;
 
+import com.example.scrapping.Constants.Constants;
 import com.example.scrapping.dto.ListPostingDTO;
 import com.example.scrapping.dto.Manufacturer;
 import com.example.scrapping.dto.Model;
@@ -17,8 +18,6 @@ import java.util.*;
 @Service
 @Slf4j
 public class PageListService {
-    private static final String MOTORCYCLESPECS_CO_ZA = "https://www.motorcyclespecs.co.za/";
-
     private static final String BIKES = "bikes/";
     private List<ListPostingDTO> listPostingDTOS = new ArrayList<>(); // to be deleted
     private List<Manufacturer> listOfManufacturers = new ArrayList<>();
@@ -114,7 +113,7 @@ public class PageListService {
             String textContent = htmlElement.getTextContent();
             if (!textContent.equals("Next")) continue;
             String semiLink = htmlElement.getAttribute("href");
-            nextButtonUrl = MOTORCYCLESPECS_CO_ZA + BIKES + semiLink;
+            nextButtonUrl = Constants.MOTORCYCLESPECS_CO_ZA + BIKES + semiLink;
             break;
         }
         return nextButtonUrl;
@@ -125,7 +124,7 @@ public class PageListService {
         client.getOptions().setCssEnabled(false);
         client.getOptions().setJavaScriptEnabled(false);
 
-        HtmlPage page = client.getPage(MOTORCYCLESPECS_CO_ZA);
+        HtmlPage page = client.getPage(Constants.MOTORCYCLESPECS_CO_ZA);
 
         HtmlElement theDivWithManuf = page.getFirstByXPath("//div[@class='subMenu']");
 
@@ -169,10 +168,10 @@ public class PageListService {
                 // URL
                 if (firstCard) {
                     HtmlElement urlFirst = htmlItem.getFirstByXPath("//a[@class='css-rc5s2u']");
-                    listPostingDTO.setUrl(MOTORCYCLESPECS_CO_ZA + urlFirst.getAttribute("href"));
+                    listPostingDTO.setUrl(Constants.MOTORCYCLESPECS_CO_ZA + urlFirst.getAttribute("href"));
                     firstCard = false;
                 } else {
-                    listPostingDTO.setUrl(MOTORCYCLESPECS_CO_ZA + divCard.getAttribute("href"));
+                    listPostingDTO.setUrl(Constants.MOTORCYCLESPECS_CO_ZA + divCard.getAttribute("href"));
                 }
 
                 // id
@@ -208,7 +207,7 @@ public class PageListService {
 
     private String composeUrlOfManuf(String semiLink) {
         String manuf = semiLink.substring(semiLink.lastIndexOf("/") + 1);
-        return MOTORCYCLESPECS_CO_ZA + BIKES + manuf;
+        return Constants.MOTORCYCLESPECS_CO_ZA + BIKES + manuf;
     }
 
 
