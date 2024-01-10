@@ -27,6 +27,7 @@ public class ModelDetailsService {
     private List<String> listOfSpecName;
     private List<String> listOfSpecValue;
     private String imageLink = "";
+    private String imageFile = "";
 
     public ModelDetailsService() {
         this.listOfSpecName = new ArrayList<>();
@@ -41,7 +42,7 @@ public class ModelDetailsService {
         int nrOfModels = manufacturer.getModelsList().size();
 
         for (Model model : manufacturer.getModelsList()) {
-            System.out.println(modelsCounter+"/"+nrOfModels + ": " + model.getName());
+            System.out.println(modelsCounter + "/" + nrOfModels + ": " + model.getName());
             modelsCounter++;
 //            if (!model.getName().equals("C 400GT")) continue;    // to be deleted
 
@@ -51,49 +52,103 @@ public class ModelDetailsService {
             HtmlElement table24;
             try {
                 table24 = page.getHtmlElementById("table24");
-            } catch (Exception e){
+            } catch (Exception e) {
                 continue;
             }
-            getImageOfTheModel(table24, model.getName());
-            printScrapedTable();
-            savePicturesOfModels(imageLink,manufacturer.getName(),model.getName());
+            getImageOfTheModel(table24, manufacturer.getName(), model.getName());
+            savePicturesOfModels(imageLink, manufacturer.getName(), model.getName());
             getDataFromTable(table24);
 
+            printScrapedTable(); // to be deleted
             listOfSpecName.clear();
             listOfSpecValue.clear();
             imageLink = "";
+            imageFile = "";
         }
         listOfSpecName.forEach(System.out::println);
     }
 
-    private void getImageOfTheModel(HtmlElement table24, String modelName) {
+    private void getImageOfTheModel(HtmlElement table24, String manufacturer, String modelName) {
         List<HtmlElement> images = table24.getByXPath(".//img");
-        String[] wordsInModelName = modelName.split(" ");
-        String modelNameNoSpaces = modelName.replaceAll(" ","");
-        for (int i =0; i<wordsInModelName.length; i++) {
-            for (HtmlElement img : images) {
-                String imgLink = img.getAttribute("src");
-                System.out.println(imgLink); // to be deleted
-                String formattedImgLink = imgLink.replace("%20", "");
-                if (formattedImgLink.contains(modelNameNoSpaces)) {
-                    imageLink = imgLink.replaceAll("../../", Constants.MOTORCYCLESPECS_CO_ZA);
-                    System.out.println(imageLink); // to be deleted
-                    break;
-                }
-            }
-            if (!imageLink.equals("")) break;
-            modelNameNoSpaces = "";
-            for (int j = 0; j< wordsInModelName.length-i-1;j++){
-                modelNameNoSpaces = modelNameNoSpaces + wordsInModelName[j];
+
+        String manufacturerNameNoSpaces = manufacturer.replaceAll(" ", "").toLowerCase();
+        for (HtmlElement img : images) {
+            String imgLink = img.getAttribute("src");
+            System.out.println(imgLink); // to be deleted
+            boolean foundImage = findModelOrManufNameInImageLink(imgLink,modelName,manufacturerNameNoSpaces);
+//            String imageJPG = formattedImgLink.substring(formattedImgLink.lastIndexOf("/") + 1);
+//            if (formattedImgLink.contains(imageJPG)) {
+//                formattedImgLink = imgLink.replace("-", "");
+//            }
+
+            if (foundImage) {
+                imageLink = imgLink.replaceAll("../../", Constants.MOTORCYCLESPECS_CO_ZA);
+                System.out.println("imageLink:        " + imageLink); // to be deleted
+                System.out.println("imageFile:        " + imageFile); // to be deleted
+                break;
             }
         }
+//        String[] wordsInModelName = modelName.split(" ");
+//        String modelNameNoSpaces = modelName.replaceAll(" ","");
+//        for (int i =0; i<wordsInModelName.length; i++) {
+//            for (HtmlElement img : images) {
+//                String imgLink = img.getAttribute("src");
+//                System.out.println(imgLink); // to be deleted
+//                String formattedImgLink = imgLink.replace("%20", "");
+//                if (formattedImgLink.contains(modelNameNoSpaces)) {
+//                    imageLink = imgLink.replaceAll("../../", Constants.MOTORCYCLESPECS_CO_ZA);
+//                    imageFile = formattedImgLink.substring(formattedImgLink.lastIndexOf("/"));
+//                    System.out.println("formattedImgLink: " + formattedImgLink); // to be deleted
+//                    System.out.println("imageLink:        " + imageLink); // to be deleted
+//                    System.out.println("imageFile:        " + imageFile); // to be deleted
+//                    break;
+//                }
+//            }
+//            if (!imageLink.equals("")) break;
+//            modelNameNoSpaces = "";
+//            for (int j = 0; j< wordsInModelName.length-i-1;j++){
+//                modelNameNoSpaces = modelNameNoSpaces + wordsInModelName[j];
+//            }
+//        }
+    }
 
+    private boolean findModelOrManufNameInImageLink(String link, String modelName, String manufName){
+        String formattedImgLink = link.replace("%20", "").replace("-", "");
+        if (formattedImgLink.toLowerCase().contains(manufName)) {
+            imageFile = formattedImgLink.substring(formattedImgLink.lastIndexOf("/") + 1);
+            System.out.println("formattedImgLink: " + formattedImgLink); // to be deleted
+            return true;
+        }
+        String[] modelNameWords = removeAllNotLettersNumbersOrSpace(modelName).split(" ");
+        String imageJPG = formattedImgLink.substring(formattedImgLink.lastIndexOf("/"));
+        for (String wordOfModelName : modelNameWords){
+            if (wordOfModelName.length()>2 && imageJPG.toLowerCase().contains(wordOfModelName.toLowerCase()));{
+                imageFile = formattedImgLink.substring(formattedImgLink.lastIndexOf("/") + 1);
+                System.out.println("formattedImgLink: " + formattedImgLink); // to be deleted
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String removeAllNotLettersNumbersOrSpace(String text){
+        StringBuilder result = new StringBuilder();
+        for (int i=0; i<text.length();i++){
+            if (Character.isDigit(text.charAt(i)) || Character.isLetter(text.charAt(i)) || text.charAt(i)==' '){
+                result.append(text.charAt(i));
+            }
+        }
+        return result.toString();
     }
 
     private void savePicturesOfModels(String imageLink, String manufacturer, String model) throws IOException {
         String picturesPathBase = "D:/Learning/Projects/Scrapping Projects/MotorcycleSpecsScrapper/Scrapped Images DB/" + manufacturer + "/";
         createManufacturerFolder(picturesPathBase);
-        String picturesPath = picturesPathBase + model.replaceAll(" ","") + ".jpg";
+        String picturesPath = picturesPathBase + imageFile;
+//        String picturesPath = picturesPathBase + model.replaceAll(" ","")
+//                .replaceAll("/","")
+//                .replaceAll(".","")
+//                + ".jpg";
 //        Path path = Paths.get(imageLink);
 
         try {
@@ -124,17 +179,17 @@ public class ModelDetailsService {
         }
     }
 
-    private void getDataFromTable(HtmlElement table24){
+    private void getDataFromTable(HtmlElement table24) {
         List<HtmlElement> rows = table24.getByXPath(".//tr");
         for (HtmlElement row : rows) {
             List<HtmlTableCell> cells = row.getByXPath(".//td");
             if (cells.size() == 2) {
                 int cellNr = 1;
                 for (HtmlElement cell : cells) {
-                    if (cell.getTextContent().contains("Lubrication")){
+                    if (cell.getTextContent().contains("Lubrication")) {
                         System.out.println("Here!!");
                     }
-                    String cellText = cell.getTextContent().replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "").replaceAll(" ","").trim();
+                    String cellText = cell.getTextContent().replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "").replaceAll(" ", "").trim();
                     if (cellNr == 1) {
                         listOfSpecName.add(cellText);
                     } else {
@@ -146,11 +201,11 @@ public class ModelDetailsService {
             }
         }
     }
-    
-    private void printScrapedTable(){
-        System.out.println("total rows: "+listOfSpecValue.size());
-        for (int i=0; i<listOfSpecValue.size(); i++){
-            System.out.println((i+1)+".\t"+listOfSpecName.get(i)+"\t"+listOfSpecValue.get(i));
+
+    private void printScrapedTable() {
+        System.out.println("total rows: " + listOfSpecValue.size());
+        for (int i = 0; i < listOfSpecValue.size(); i++) {
+            System.out.println((i + 1) + ".\t" + listOfSpecName.get(i) + "\t" + listOfSpecValue.get(i));
         }
         System.out.println("--------------------------");
     }

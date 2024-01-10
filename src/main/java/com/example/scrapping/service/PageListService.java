@@ -23,7 +23,8 @@ public class PageListService {
     private List<Manufacturer> listOfManufacturers = new ArrayList<>();
     //    Map<String,String> listOfManufacturers = new TreeMap<>();
     private static final List<String> listOfMotorcyclesWithDifferentUrlFormat = new ArrayList<>((Arrays.asList("aprilia")));
-    private static final List<String> listOfLinksToIgnore = new ArrayList<>((Arrays.asList("Home","Manufacturer","Contact","Previous","Classic Bikes")));
+    private static final List<String> listOfMotorcyclesWithDifferentUrlFormatRacers = new ArrayList<>((Arrays.asList("brough superior")));
+    private static final List<String> listOfLinksToIgnore = new ArrayList<>((Arrays.asList("Home", "Manufacturer", "Contact", "Previous", "Classic Bikes")));
 
     @Autowired
     ModelDetailsService modelDetailsService;
@@ -45,7 +46,7 @@ public class PageListService {
 
     private void getModelsDetails() throws IOException {
         for (Manufacturer manufacturer : listOfManufacturers) {
-        modelDetailsService.getModelDetails(manufacturer);
+            modelDetailsService.getModelDetails(manufacturer);
         }
     }
 
@@ -56,19 +57,20 @@ public class PageListService {
         client.getOptions().setJavaScriptEnabled(false);
 
         for (Manufacturer manufacturer : listOfManufacturers) {
-            if (!manufacturer.getName().equals("BMW")) continue;    // to be deleted
+//            if (!manufacturer.getName().equals("BMW")) continue;    // to be deleted
+            if (!manufacturer.getName().equals("Brough Superior")) continue;    // to be deleted
 
             HtmlPage page = client.getPage(manufacturer.getUrl());
             String nextButtonUrl = getNextButtonUrl(page);
             boolean canScrapPage = true;
             int pageCounter = 1; // to be deleted
             while (canScrapPage) {
-                System.out.println("--------------------- Page: "+pageCounter+" ---------------------"); // to be deleted
+                System.out.println("--------------------- Page: " + pageCounter + " ---------------------"); // to be deleted
                 pageCounter++; // to be deleted
                 List<HtmlElement> items = page.getByXPath("//td");
                 int modelPerPageCounter = 1;
                 for (HtmlElement item : items) {
-                    if(pageCounter!=9) continue; // to be deleted
+//                    if(pageCounter!=9) continue; // to be deleted
                     HtmlElement anchor = item.getFirstByXPath(".//font/a");
 
                     if (anchor == null) anchor = item.getFirstByXPath(".//p/a");
@@ -77,20 +79,22 @@ public class PageListService {
 
                     if (anchor != null) {
                         String modelName = anchor.getTextContent();
-                        modelName = modelName.replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "").replaceAll(" ","").trim();
+                        modelName = modelName.replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "").replaceAll(" ", "").trim();
+                        if (modelName.isEmpty()) continue;
                         if (listOfLinksToIgnore.contains(modelName)) continue;
+
                         String semiLink = anchor.getAttribute("href");
                         String url = composeUrlOfModel(manufacturer, semiLink);
                         Model model = new Model(modelName, url);
                         manufacturer.addModel(model);
-                        if (model.getUrl().isEmpty() || model.getName().isEmpty()) { // to be deleted
-                            continue;
-                        }
+
+                        if (model.getUrl().isEmpty()) continue;
                         System.out.println(modelPerPageCounter + ". " + model); // to be deleted
                         modelPerPageCounter++; // to be deleted
                     }
                 }
-                if(pageCounter==9) break; // to be deleted
+//                if(pageCounter==9) break; // to be deleted
+                if (pageCounter == 1) break; // to be deleted
                 canScrapPage = !nextButtonUrl.isEmpty();
                 if (canScrapPage) {
                     page = client.getPage(nextButtonUrl);
@@ -140,11 +144,13 @@ public class PageListService {
 
             String manufName = element.getTextContent();
             if (manufName.isBlank() || manufName.contains("Complete Manufacturer")) continue;
-            if(!manufName.equals("BMW")) continue; // to be deleted
+            if (!manufName.equals("Brough Superior")) continue; // to be deleted
+//            if(!manufName.equals("BMW")) continue; // to be deleted
 
             Manufacturer manufacturer = new Manufacturer(manufName, composeUrlOfManuf(semiLink));
             listOfManufacturers.add(manufacturer);
-            if(manufName.equals("BMW")) break; // to be deleted
+            if (manufName.equals("Brough Superior")) break; // to be deleted
+//            if(manufName.equals("BMW")) break; // to be deleted
         }
 //        listOfManufacturers.forEach(System.out::println);
 //        System.out.println("Here");
@@ -196,13 +202,25 @@ public class PageListService {
     }
 
     private String composeUrlOfModel(Manufacturer manufacturer, String semiLink) {
-        String manufUrl = manufacturer.getUrl();
-        String url = semiLink.substring(semiLink.lastIndexOf("/") + 1);
-        String prefix = manufUrl.substring(0, manufUrl.lastIndexOf(".")) + "/";
-        if (listOfMotorcyclesWithDifferentUrlFormat.contains(manufacturer.getName().toLowerCase())) {
-            prefix = prefix.toLowerCase();
+        String result;
+        String manufUrl;
+        String linkHalf2;
+        String linkHalf1;
+        if (listOfMotorcyclesWithDifferentUrlFormatRacers.contains(manufacturer.getName().toLowerCase())) {
+            linkHalf1 = Constants.MOTORCYCLESPECS_CO_ZA;
+            linkHalf2 = semiLink.substring(semiLink.indexOf("/")+1);
+            result = linkHalf1 + linkHalf2;
+            return result;
         }
-        return prefix.replaceFirst("bikes", "model") + url;
+        manufUrl = manufacturer.getUrl();
+        linkHalf2 = semiLink.substring(semiLink.lastIndexOf("/") + 1);
+        linkHalf1 = manufUrl.substring(0, manufUrl.lastIndexOf(".")) + "/";
+
+        if (listOfMotorcyclesWithDifferentUrlFormat.contains(manufacturer.getName().toLowerCase())) {
+            linkHalf1 = linkHalf1.toLowerCase().replaceFirst("/bikes/", "/model/");
+        }
+        result = linkHalf1 + linkHalf2;
+        return result;
     }
 
     private String composeUrlOfManuf(String semiLink) {
