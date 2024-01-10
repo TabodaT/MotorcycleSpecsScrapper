@@ -1,7 +1,6 @@
 package com.example.scrapping.service;
 
 import com.example.scrapping.Constants.Constants;
-import com.example.scrapping.dto.ListPostingDTO;
 import com.example.scrapping.dto.Manufacturer;
 import com.example.scrapping.dto.Model;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -19,9 +18,7 @@ import java.util.*;
 @Slf4j
 public class PageListService {
     private static final String BIKES = "bikes/";
-    private List<ListPostingDTO> listPostingDTOS = new ArrayList<>(); // to be deleted
     private List<Manufacturer> listOfManufacturers = new ArrayList<>();
-    //    Map<String,String> listOfManufacturers = new TreeMap<>();
     private static final List<String> listOfMotorcyclesWithDifferentUrlFormat = new ArrayList<>((Arrays.asList("aprilia")));
     private static final List<String> listOfMotorcyclesWithDifferentUrlFormatRacers = new ArrayList<>((Arrays.asList("brough superior")));
     private static final List<String> listOfLinksToIgnore = new ArrayList<>((Arrays.asList("Home", "Manufacturer", "Contact", "Previous", "Classic Bikes")));
@@ -101,7 +98,6 @@ public class PageListService {
                     nextButtonUrl = getNextButtonUrl(page);
                 }
 //                manufacturer.printModels();
-                System.out.println("HERE ---------------------------------"); // to be deleted
             }
 //            modelDetailsService.getModelDetails(manufacturer);
 
@@ -152,53 +148,6 @@ public class PageListService {
             if (manufName.equals("Brough Superior")) break; // to be deleted
 //            if(manufName.equals("BMW")) break; // to be deleted
         }
-//        listOfManufacturers.forEach(System.out::println);
-//        System.out.println("Here");
-
-        /* ------------------------------------------------------- */
-        /* ------------------------------------------------------- */ // to be deleted
-        if (false) {
-            List<HtmlElement> items = page.getByXPath("//div[@class='subMenu']");
-
-            boolean firstCard = true;
-            int it = 0;
-            for (HtmlElement htmlItem : items) {
-                ListPostingDTO listPostingDTO = new ListPostingDTO();
-                String href = htmlItem.getAttribute("href");
-                System.out.println(href);
-                HtmlElement divCard = (HtmlElement) htmlItem.getFirstChild();
-
-                // Title
-//            listPostingDTO.setTitle(titles.get(it).asNormalizedText());
-
-                // URL
-                if (firstCard) {
-                    HtmlElement urlFirst = htmlItem.getFirstByXPath("//a[@class='css-rc5s2u']");
-                    listPostingDTO.setUrl(Constants.MOTORCYCLESPECS_CO_ZA + urlFirst.getAttribute("href"));
-                    firstCard = false;
-                } else {
-                    listPostingDTO.setUrl(Constants.MOTORCYCLESPECS_CO_ZA + divCard.getAttribute("href"));
-                }
-
-                // id
-                listPostingDTO.setId(Integer.parseInt(htmlItem.getAttribute("id")));
-
-                // price & currency
-//            setPriceAndCurrency(listPostingDTO, prices, it);
-
-                // location and date
-                try {
-//                setLocationAndDate(listPostingDTO, locationsAndDates, it);
-                } catch (Exception e) {
-                    log.warn("Date parse exception: " + e);
-                }
-
-                listPostingDTOS.add(listPostingDTO);
-                it++;
-                System.out.println(listPostingDTO + "\n");
-            }
-            System.out.println("DONE");
-        }
     }
 
     private String composeUrlOfModel(Manufacturer manufacturer, String semiLink) {
@@ -227,15 +176,5 @@ public class PageListService {
         String manuf = semiLink.substring(semiLink.lastIndexOf("/") + 1);
         return Constants.MOTORCYCLESPECS_CO_ZA + BIKES + manuf;
     }
-
-
-//    public List<String> getAllUserNames(){
-//        List<String> usernameList = new ArrayList<>();
-//
-//        usernameList.addAll(jdbcTemplate.queryForList("SELECT fullname from user;", String.class));
-//
-//        usernameList.forEach(System.out::println);
-//        return usernameList;
-//    }
 
 }

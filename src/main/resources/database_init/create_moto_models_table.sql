@@ -27,5 +27,6 @@ CREATE TABLE `moto_models` (
   `power_to_weight_ratio` varchar(50),
   `top_speed` varchar(50),
   `url` varchar(50),
+  `image` varchar(50),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

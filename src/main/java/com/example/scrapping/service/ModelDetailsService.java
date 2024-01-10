@@ -8,18 +8,17 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.*;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -44,11 +43,9 @@ public class ModelDetailsService {
         for (Model model : manufacturer.getModelsList()) {
             System.out.println(modelsCounter + "/" + nrOfModels + ": " + model.getName());
             modelsCounter++;
-//            if (!model.getName().equals("C 400GT")) continue;    // to be deleted
 
             HtmlPage page = client.getPage(model.getUrl());
 
-//            HtmlElement anchor = page.getFirstByXPath(".//font/a");
             HtmlElement table24;
             try {
                 table24 = page.getHtmlElementById("table24");
@@ -76,10 +73,6 @@ public class ModelDetailsService {
             String imgLink = img.getAttribute("src");
             System.out.println(imgLink); // to be deleted
             boolean foundImage = findModelOrManufNameInImageLink(imgLink,modelName,manufacturerNameNoSpaces);
-//            String imageJPG = formattedImgLink.substring(formattedImgLink.lastIndexOf("/") + 1);
-//            if (formattedImgLink.contains(imageJPG)) {
-//                formattedImgLink = imgLink.replace("-", "");
-//            }
 
             if (foundImage) {
                 imageLink = imgLink.replaceAll("../../", Constants.MOTORCYCLESPECS_CO_ZA);
@@ -88,28 +81,6 @@ public class ModelDetailsService {
                 break;
             }
         }
-//        String[] wordsInModelName = modelName.split(" ");
-//        String modelNameNoSpaces = modelName.replaceAll(" ","");
-//        for (int i =0; i<wordsInModelName.length; i++) {
-//            for (HtmlElement img : images) {
-//                String imgLink = img.getAttribute("src");
-//                System.out.println(imgLink); // to be deleted
-//                String formattedImgLink = imgLink.replace("%20", "");
-//                if (formattedImgLink.contains(modelNameNoSpaces)) {
-//                    imageLink = imgLink.replaceAll("../../", Constants.MOTORCYCLESPECS_CO_ZA);
-//                    imageFile = formattedImgLink.substring(formattedImgLink.lastIndexOf("/"));
-//                    System.out.println("formattedImgLink: " + formattedImgLink); // to be deleted
-//                    System.out.println("imageLink:        " + imageLink); // to be deleted
-//                    System.out.println("imageFile:        " + imageFile); // to be deleted
-//                    break;
-//                }
-//            }
-//            if (!imageLink.equals("")) break;
-//            modelNameNoSpaces = "";
-//            for (int j = 0; j< wordsInModelName.length-i-1;j++){
-//                modelNameNoSpaces = modelNameNoSpaces + wordsInModelName[j];
-//            }
-//        }
     }
 
     private boolean findModelOrManufNameInImageLink(String link, String modelName, String manufName){
@@ -140,16 +111,22 @@ public class ModelDetailsService {
         }
         return result.toString();
     }
-
     private void savePicturesOfModels(String imageLink, String manufacturer, String model) throws IOException {
-        String picturesPathBase = "D:/Learning/Projects/Scrapping Projects/MotorcycleSpecsScrapper/Scrapped Images DB/" + manufacturer + "/";
+        String allManufacturersFolder = "D:/Learning/Projects/Scrapping Projects/MotorcycleSpecsScrapper/Scrapped Images DB";
+        String picturesPathBase = allManufacturersFolder + "/" + manufacturer;
         createManufacturerFolder(picturesPathBase);
-        String picturesPath = picturesPathBase + imageFile;
-//        String picturesPath = picturesPathBase + model.replaceAll(" ","")
-//                .replaceAll("/","")
-//                .replaceAll(".","")
-//                + ".jpg";
-//        Path path = Paths.get(imageLink);
+        String picturesPath = picturesPathBase + "/" + imageFile;
+
+        File directoryPath = new File(allManufacturersFolder);
+        List<String> manufacturersFolders = Arrays.asList(Objects.requireNonNull(directoryPath.list()));
+        if (manufacturersFolders.contains(manufacturer)){
+            File filesPath = new File(picturesPathBase);
+            List<String> images = Arrays.asList(Objects.requireNonNull(filesPath.list()));
+            if (images.contains(imageFile)) {
+                System.out.println("Image exists!");  // to be deleted
+                return;
+            }
+        }
 
         try {
             downloadImage(imageLink, picturesPath);
@@ -173,7 +150,6 @@ public class ModelDetailsService {
 
         try (InputStream inputStream = connection.getInputStream()) {
             // Using java.nio.file for copying the input stream to a local file
-//            Path destination = Paths.get(destinationPath);
             Path destination = Paths.get(destinationPath);
             Files.copy(inputStream, destination, StandardCopyOption.REPLACE_EXISTING);
         }
