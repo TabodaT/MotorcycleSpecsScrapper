@@ -3,13 +3,13 @@ package com.example.scrapping.service;
 import com.example.scrapping.Constants.Constants;
 import com.example.scrapping.dto.Manufacturer;
 import com.example.scrapping.dto.Model;
+import com.example.scrapping.dto.MotoModelDTO;
+import com.example.scrapping.mappers.MotoModelsMapper;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -57,6 +57,11 @@ public class ModelDetailsService {
             getDataFromTable(table24);
 
             printScrapedTable(); // to be deleted
+
+            MotoModelsMapper motoModelsMapper = new MotoModelsMapper();
+            MotoModelDTO motoModelDTO = motoModelsMapper.mapMotoModel(listOfSpecName,listOfSpecValue, manufacturer, model, imageFile);
+            System.out.println(motoModelDTO); // to be deleted
+
             listOfSpecName.clear();
             listOfSpecValue.clear();
             imageLink = "";
@@ -71,13 +76,13 @@ public class ModelDetailsService {
         String manufacturerNameNoSpaces = manufacturer.replaceAll(" ", "").toLowerCase();
         for (HtmlElement img : images) {
             String imgLink = img.getAttribute("src");
-            System.out.println(imgLink); // to be deleted
+//            System.out.println(imgLink); // to be deleted
             boolean foundImage = findModelOrManufNameInImageLink(imgLink,modelName,manufacturerNameNoSpaces);
 
             if (foundImage) {
                 imageLink = imgLink.replaceAll("../../", Constants.MOTORCYCLESPECS_CO_ZA);
-                System.out.println("imageLink:        " + imageLink); // to be deleted
-                System.out.println("imageFile:        " + imageFile); // to be deleted
+//                System.out.println("imageLink:        " + imageLink); // to be deleted
+//                System.out.println("imageFile:        " + imageFile); // to be deleted
                 break;
             }
         }
@@ -87,7 +92,7 @@ public class ModelDetailsService {
         String formattedImgLink = link.replace("%20", "").replace("-", "");
         if (formattedImgLink.toLowerCase().contains(manufName)) {
             imageFile = formattedImgLink.substring(formattedImgLink.lastIndexOf("/") + 1);
-            System.out.println("formattedImgLink: " + formattedImgLink); // to be deleted
+//            System.out.println("formattedImgLink: " + formattedImgLink); // to be deleted
             return true;
         }
         String[] modelNameWords = removeAllNotLettersNumbersOrSpace(modelName).split(" ");
