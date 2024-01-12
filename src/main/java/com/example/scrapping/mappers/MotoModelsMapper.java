@@ -5,6 +5,7 @@ import com.example.scrapping.dto.Model;
 import com.example.scrapping.dto.MotoModelDTO;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -72,7 +73,7 @@ public class MotoModelsMapper {
         String result = "0";
         for (int i = 0; i < listOfSpecName.size(); i++){
             String nameOfSpecAtI = listOfSpecName.get(i).toLowerCase();
-            String[] wordsInSpecName = nameOfSpecAtI.split("_");
+            List<String> wordsInSpecName = getWords(nameOfSpecAtI);
             String valueOfSpecAtI = listOfSpecValue.get(i);
             if (nameOfSpecAtI.equals(specName)){                          // EQUALS
                 if (specName.equals("year")){
@@ -90,18 +91,24 @@ public class MotoModelsMapper {
                 result = valueOfSpecAtI;
             }else if(nameOfSpecAtI.contains(specName)){                   // CONTAINS
                 if (nameOfSpecAtI.contains("power") && !nameOfSpecAtI.contains("weight")){
-                    result = formatPower(valueOfSpecAtI);
+                    result = formatKwOrNm(valueOfSpecAtI, "kw");
                     break;
                 }
-                if (specName.equals("torque") || specName.equals("transmission") || specName.equals("drive")) {
+                if (specName.equals("transmission") || specName.equals("drive")) {
                     result = valueOfSpecAtI;
+                    break;
+                }
+                if (specName.equals("torque")){
+                    result = formatKwOrNm(valueOfSpecAtI, "nm");;
                     break;
                 }
                 if (nameOfSpecAtI.contains("weigh")){
                     result = formatWeightKg(valueOfSpecAtI);
+                    break;
                 }
                 if (specName.equals("seat")){
-                    result =
+                    result = getSeatMMHeight(valueOfSpecAtI);
+                    break;
                 }
 
                 result = valueOfSpecAtI;
@@ -120,24 +127,20 @@ public class MotoModelsMapper {
         return result;
     }
 
-    private String formatPower(String power){
-        String formatPower = "";
-        String preFormat = power.substring(0,power.toLowerCase().indexOf("kw")).trim().replaceAll(" ","");
-        if (preFormat.contains("/") || preFormat.contains("hp")){
-            int locOfSlash = preFormat.indexOf("/");
-            int locOfHP = preFormat.indexOf("hp");
-            int cutFromLoc = Math.max(locOfHP,locOfSlash);
-            if (preFormat.contains("hp") && locOfHP == cutFromLoc){
-                cutFromLoc+=2;
-            } else if (preFormat.contains("/") && locOfSlash == cutFromLoc){
-                cutFromLoc++;
-            }
-            formatPower = preFormat.substring(cutFromLoc);
-        } else {
-            formatPower = preFormat;
+    private String getSeatMMHeight(String seat){
+        return seat.toLowerCase().substring(0,seat.indexOf("mm"));
+    }
+
+    private String formatKwOrNm(String powerOrTorque, String kwOrNm){
+        String formatPowerOrTorque = "";
+        String preFormat = powerOrTorque.substring(0,powerOrTorque.toLowerCase().indexOf(kwOrNm)).trim().replaceAll(" ","");
+        for (int i = preFormat.length()-1; i>=0; i--){
+            char c = preFormat.charAt(i);
+            if (Character.isDigit(c)){
+                formatPowerOrTorque = c + formatPowerOrTorque;
+            } else break;
         }
-        checkIfValueIsExtracted(formatPower,power);
-        return formatPower;
+        return formatPowerOrTorque;
     }
 
     private String formatWeightKg(String weight){
@@ -156,6 +159,19 @@ public class MotoModelsMapper {
         String formattedYear = year.trim().replaceAll("-","");
 
         return formattedYear;
+    }
+
+    private List<String> getWords(String specName){
+        List<String> result = Arrays.asList(specName.split(" "));
+        if (result.size()==1){
+            for (int i =0; i<specName.length();i++){
+                char c = specName.charAt(i);
+                if (!Character.isLetter(c)){
+                    result = Arrays.asList(specName.split(String.valueOf(c)));
+                }
+            }
+        }
+        return result;
     }
 
     private void checkIfValueIsExtracted(String value, String field){
