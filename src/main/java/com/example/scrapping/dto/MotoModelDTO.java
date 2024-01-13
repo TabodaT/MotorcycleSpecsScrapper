@@ -23,9 +23,9 @@ public class MotoModelDTO {
     private String seatHeight;
     private int dryWeight;
     private int wetWeight;
-    private String fuelCapacity;
-    private String reserve;
-    private String consumption;
+    private int fuelCapacity;
+    private int reserve;
+    private double consumption;
     private String range;
     private String coolingSystem;
     private String ignition;
