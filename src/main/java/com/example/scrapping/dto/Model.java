@@ -1,10 +1,17 @@
 package com.example.scrapping.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
+@Getter
+@Setter
 public class Model extends MotoListing implements Comparable<Model>{
-    public Model(String name, String url) {
+    private String productionYears;
+    public Model(String name, String url, String productionYears) {
         super(name, url);
+        this.productionYears = productionYears;
     }
 
     @Override
@@ -34,5 +41,10 @@ public class Model extends MotoListing implements Comparable<Model>{
     @Override
     public int compareTo(Model o) {
         return this.toString().compareTo(o.toString());
+    }
+
+    @Override
+    public String toString() {
+        return this.getName() + " ("+ this.getProductionYears() + ") " + this.getUrl();
     }
 }

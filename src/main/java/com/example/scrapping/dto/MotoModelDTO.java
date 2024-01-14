@@ -3,6 +3,9 @@ package com.example.scrapping.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.lang.reflect.Field;
+import java.util.*;
+
 @Getter
 @Setter
 public class MotoModelDTO {
@@ -10,61 +13,54 @@ public class MotoModelDTO {
     private String make;
     private String model;
     private int year;
+    private int end_year;
     private String engine;
-    private String capacity;
-    private String power;
+    private int capacity;   // cc
+    private int power;  // kw
     private String clutch;
-    private String torque;
+    private int torque;
     private boolean abs;
-    private String frontBrakes;
-    private String rearBrakes;
     private String transmission;
     private String finalDrive;
-    private String seatHeight;
-    private int dryWeight;
-    private int wetWeight;
-    private int fuelCapacity;
+    private int seatHeight; // mm
+    private int dryWeight;  // kg
+    private int wetWeight;  // kg
+    private int fuelCapacity; // Litres
     private int reserve;
     private double consumption;
-    private String range;
     private String coolingSystem;
-    private String ignition;
-    private String oil_capacity;
-    private String power_to_weight_ratio;
-    private String top_speed;
+    private int top_speed; // km/h
     private String url;
     private String image;
 
     @Override
     public String toString() {
-        return "MotoModelDTO{" +
-                "id=" + id +
-                ", make='" + make + '\'' +
-                ", model='" + model + '\'' +
-                ", engine='" + engine + '\'' +
-                ", capacity='" + capacity + '\'' +
-                ", power='" + power + '\'' +
-                ", clutch='" + clutch + '\'' +
-                ", torque='" + torque + '\'' +
-                ", abs=" + abs +
-                ", frontBrakes='" + frontBrakes + '\'' +
-                ", rearBrakes='" + rearBrakes + '\'' +
-                ", transmission='" + transmission + '\'' +
-                ", finalDrive='" + finalDrive + '\'' +
-                ", seatHeight='" + seatHeight + '\'' +
-                ", dryWeight='" + dryWeight + '\'' +
-                ", wetWeight='" + wetWeight + '\'' +
-                ", fuelCapacity='" + fuelCapacity + '\'' +
-                ", reserve='" + reserve + '\'' +
-                ", consumption='" + consumption + '\'' +
-                ", range='" + range + '\'' +
-                ", coolingSystem='" + coolingSystem + '\'' +
-                ", ignition='" + ignition + '\'' +
-                ", oil_capacity='" + oil_capacity + '\'' +
-                ", power_to_weight_ratio='" + power_to_weight_ratio + '\'' +
-                ", top_speed='" + top_speed + '\'' +
-                ", url='" + url + '\'' +
-                ", image='" + image + '\'' +
-                '}';
+        StringBuilder sb = new StringBuilder();
+        Class<?> c = this.getClass();
+        Field[] fields = c.getDeclaredFields();
+        Map<String, Object> temp = new HashMap<>();
+
+        for( Field field : fields ){
+            try {
+                temp.put(field.getName(), field.get(this));
+            } catch (IllegalArgumentException | IllegalAccessException e1) {
+                System.out.println(e1);
+            }
+        }
+        List<String> listOfNotNullFields = new ArrayList<>();
+        for (Map.Entry<String, Object> entry : temp.entrySet()) {
+            Object value = entry.getValue();
+
+            if ((value instanceof String && !((String) value).isEmpty()) || (value instanceof Integer && (Integer) value != 0)) {
+                listOfNotNullFields.add(entry.getKey());
+            }
+        }
+
+        Collections.sort(listOfNotNullFields);
+        for (String field : listOfNotNullFields){
+            sb.append(field).append(":\t").append(temp.get(field)).append("\n");
+        }
+
+        return sb.toString();
     }
 }

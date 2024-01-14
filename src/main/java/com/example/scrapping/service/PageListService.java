@@ -7,6 +7,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,9 +65,10 @@ public class PageListService {
             while (canScrapPage) {
                 System.out.println("--------------------- Page: " + pageCounter + " ---------------------"); // to be deleted
                 pageCounter++; // to be deleted
-                List<HtmlElement> items = page.getByXPath("//td");
                 int modelPerPageCounter = 1;
-                for (HtmlElement item : items) {
+                List<HtmlElement> items = page.getByXPath("//tr");
+                for (int i=0; i<items.size(); i++){
+                    HtmlElement item = items.get(i);
 //                    if(pageCounter!=9) continue; // to be deleted
                     HtmlElement anchor = item.getFirstByXPath(".//font/a");
 
@@ -80,9 +82,24 @@ public class PageListService {
                         if (modelName.isEmpty()) continue;
                         if (listOfLinksToIgnore.contains(modelName)) continue;
 
+                        String productionYears = "";
                         String semiLink = anchor.getAttribute("href");
                         String url = composeUrlOfModel(manufacturer, semiLink);
-                        Model model = new Model(modelName, url);
+                        List<HtmlTableCell> cells = item.getByXPath(".//td");
+                        int cellNr = 1;
+                        for (HtmlElement cell : cells) {
+                            if (cellNr == 2) {
+                                productionYears = cell.getTextContent().replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "").replaceAll(" ", "").replaceAll(" ","");
+                                if (productionYears.length()>10){
+                                    productionYears = "";
+                                }
+                            }
+//                        System.out.println(cell.getTextContent());
+                            cellNr++;
+                        }
+
+                        Model model = new Model(modelName, url, productionYears);
+
                         manufacturer.addModel(model);
 
                         if (model.getUrl().isEmpty()) continue;

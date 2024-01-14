@@ -5,6 +5,7 @@ import com.example.scrapping.dto.Model;
 import com.example.scrapping.dto.MotoModelDTO;
 import lombok.extern.slf4j.Slf4j;
 
+import java.sql.PreparedStatement;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -15,12 +16,15 @@ public class MotoModelsMapper {
     private List<String> listOfSpecValue;
     private Manufacturer manufacturer;
     private String modelName;
+    private String modelProductionYears;
+    private String endYear = "0";
 
     public MotoModelDTO mapMotoModel(List<String> listOfSpecName, List<String> listOfSpecValue, Manufacturer manufacturer, Model model, String imageFile) {
         this.listOfSpecName = listOfSpecName;
         this.listOfSpecValue = listOfSpecValue;
         this.manufacturer = manufacturer;
         this.modelName = model.getName();
+        this.modelProductionYears = model.getProductionYears();
 
         MotoModelDTO motoModelDTO = new MotoModelDTO();
 
@@ -33,23 +37,21 @@ public class MotoModelsMapper {
         //   engine
         motoModelDTO.setEngine(getSpecValue("engine"));
         //   capacity
-        motoModelDTO.setCapacity(getSpecValue("capacity"));
+        motoModelDTO.setCapacity(Integer.parseInt(getSpecValue("capacity")));
         //   power
-        motoModelDTO.setPower(getSpecValue("power"));
+        motoModelDTO.setPower(Integer.parseInt(getSpecValue("power")));
         //   clutch
         motoModelDTO.setClutch(getSpecValue("clutch"));
         //   torque
-        motoModelDTO.setTorque(getSpecValue("torque"));
+        motoModelDTO.setTorque(Integer.parseInt(getSpecValue("torque")));
         //   abs
         motoModelDTO.setAbs(Boolean.parseBoolean(getSpecValue("abs")));
-        //   front_brakes
-        //   rear_brakes
         //   transmission
         motoModelDTO.setTransmission(getSpecValue("transmission"));
         //   final_drive
         motoModelDTO.setFinalDrive(getSpecValue("drive"));
         //   seat_height
-        motoModelDTO.setSeatHeight(getSpecValue("seat"));
+        motoModelDTO.setSeatHeight(Integer.parseInt(getSpecValue("seat")));
         //   dry_weight
         motoModelDTO.setDryWeight(Integer.parseInt(getSpecValue("dry")));
         //   wet_weight
@@ -66,12 +68,10 @@ public class MotoModelsMapper {
         motoModelDTO.setReserve(Integer.parseInt(getSpecValue("reserve")));
         //   consumption
         motoModelDTO.setConsumption(Double.parseDouble(getSpecValue("consumption")));
-        //   range
         //   cooling_system
-        //   ignition
-        //   oil_capacity
-        //   power_to_weight_ratio
+        motoModelDTO.setCoolingSystem(getSpecValue("cooling"));
         //   top_speed
+        motoModelDTO.setTop_speed(Integer.parseInt(getSpecValue("speed")));
         //   url
         motoModelDTO.setUrl(model.getUrl());
         //   image
@@ -85,7 +85,6 @@ public class MotoModelsMapper {
         String result = "0";
         for (int i = 0; i < listOfSpecName.size(); i++) {
             String nameOfSpecAtI = listOfSpecName.get(i).toLowerCase();
-            List<String> wordsInSpecName = getWords(nameOfSpecAtI);
             String valueOfSpecAtI = listOfSpecValue.get(i);
             if (nameOfSpecAtI.equals(specName)) {                          // EQUALS
                 if (specName.equals("year")) {
@@ -93,7 +92,7 @@ public class MotoModelsMapper {
                     break;
                 }
                 if (specName.equals("capacity")) {
-                    result = formatCapacityCC(valueOfSpecAtI);
+                    result = formatMetricUnit(valueOfSpecAtI, "cc");
                     break;
                 }
                 if (specName.equals("clutch")) {
@@ -101,41 +100,49 @@ public class MotoModelsMapper {
                     break;
                 }
                 if (specName.equals("weight")) {
-                    result = formatWeightKg(valueOfSpecAtI);
+                    result = formatMetricUnit(valueOfSpecAtI, "kg");
                     break;
                 }
                 result = valueOfSpecAtI;
             } else if (nameOfSpecAtI.contains(specName)) {                   // CONTAINS
                 if (nameOfSpecAtI.contains("power") && !nameOfSpecAtI.contains("weight")) {
-                    result = formatKwOrNmOrLitre(valueOfSpecAtI, "kw");
+                    result = formatMetricUnit(valueOfSpecAtI, "kw");
                     break;
                 }
-                if (specName.equals("transmission") || specName.equals("drive")) {
+                if (specName.equals("drive") || specName.equals("cooling")) {
                     result = valueOfSpecAtI;
                     break;
                 }
                 if (specName.equals("torque")) {
-                    result = formatKwOrNmOrLitre(valueOfSpecAtI, "nm");
+                    result = formatMetricUnit(valueOfSpecAtI, "nm");
                     break;
                 }
                 if (nameOfSpecAtI.contains("dry") || nameOfSpecAtI.contains("wet")) {
-                    result = formatWeightKg(valueOfSpecAtI);
+                    result = formatMetricUnit(valueOfSpecAtI, "kg");
                     break;
                 }
                 if (specName.equals("seat")) {
-                    result = getSeatMMHeight(valueOfSpecAtI);
+                    result = formatMetricUnit(valueOfSpecAtI, "mm");
                     break;
                 }
                 if (specName.equals("fuel capacity") || specName.equals("load capacity")) {
-                    result = formatKwOrNmOrLitre(valueOfSpecAtI, "litre");
+                    result = formatMetricUnit(valueOfSpecAtI, "litre");
                     break;
                 }
                 if (specName.equals("reserve")) {
-                    result = formatKwOrNmOrLitre(valueOfSpecAtI, "l");
+                    result = formatMetricUnit(valueOfSpecAtI, "l");
+                    break;
+                }
+                if (specName.equals("speed")) {
+                    result = formatMetricUnit(valueOfSpecAtI, "km");
                     break;
                 }
                 if (specName.equals("consumption")) {
                     result = getConsumption(valueOfSpecAtI);
+                    break;
+                }
+                if (specName.equals("transmission")) {
+                    result = formatMetricUnit(valueOfSpecAtI, "speed");
                     break;
                 }
 
@@ -159,7 +166,7 @@ public class MotoModelsMapper {
         String result = "";
         String preFormat = "";
         if (rawSpecValue.toLowerCase().contains("km")) {
-            preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("km")).trim().replaceAll(" ", "").substring(0,rawSpecValue.toLowerCase().indexOf("l"));
+            preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("km")).trim().replaceAll(" ", "").substring(0, rawSpecValue.toLowerCase().indexOf("l"));
             for (int i = 0; i < preFormat.length(); i++) {
                 char c = preFormat.charAt(i);
                 if (Character.isDigit(c) || c == '.') {
@@ -170,21 +177,19 @@ public class MotoModelsMapper {
             preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("mpg")).trim().replaceAll(" ", "");
             result = getNumberFromEndOfString(preFormat);
             DecimalFormat df = new DecimalFormat("#.#");
-            double lPer100km = 235.21/Double.parseDouble(result);
+            double lPer100km = 235.21 / Double.parseDouble(result);
             result = df.format(lPer100km);
         }
         return result;
     }
 
-    private String getSeatMMHeight(String seat) {
-        return seat.toLowerCase().substring(0, seat.indexOf("mm"));
-    }
-
-    private String formatKwOrNmOrLitre(String rawSpecValue, String kwOrNmOrLitre) {
+    private String formatMetricUnit(String rawSpecValue, String kwOrNmOrLitre) {
         String result = "";
-        String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf(kwOrNmOrLitre)).trim().replaceAll(" ", "");
-        result = getNumberFromEndOfString(preFormat);
-        return result;
+        if (rawSpecValue.toLowerCase().contains(kwOrNmOrLitre)) {
+            String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf(kwOrNmOrLitre)).trim().replaceAll(" ", "");
+            result = getNumberFromEndOfString(preFormat);
+        }
+        return result.isEmpty() ? "0" : result;
     }
 
     private String getNumberFromEndOfString(String preFormat) {
@@ -204,44 +209,17 @@ public class MotoModelsMapper {
         return result;
     }
 
-    private String formatWeightKg(String weight) {
-        String formatWeight = weight.substring(0, weight.toLowerCase().indexOf("kg")).trim();
-        checkIfValueIsExtracted(formatWeight, weight);
-        return formatWeight;
-    }
-
-    private String formatCapacityCC(String capacity) {
-        String formatCapacity = capacity.trim().substring(0, capacity.indexOf("cc"));
-        checkIfValueIsExtracted(formatCapacity, capacity);
-        return formatCapacity;
-    }
-
     private String formatYear(String year) {
-        String formattedYear = year.trim().replaceAll("-", "");
-
-        return formattedYear;
-    }
-
-    private List<String> getWords(String specName) {
-        List<String> result = Arrays.asList(specName.split(" "));
-        if (result.size() == 1) {
-            for (int i = 0; i < specName.length(); i++) {
-                char c = specName.charAt(i);
-                if (!Character.isLetter(c)) {
-                    result = Arrays.asList(specName.split(String.valueOf(c)));
-                }
-            }
+        String result = "0";
+        String yearsToBeFormatted = year.isEmpty() ? modelProductionYears : year;
+        String[] years = yearsToBeFormatted.trim().split("-");
+        result = years[0];
+        if (years.length == 1){
+            endYear = years[0];
+        } else {
+            endYear = years[1];
         }
         return result;
-    }
-
-    private void checkIfValueIsExtracted(String value, String field) {
-        try {
-            int convert = Integer.parseInt(value);
-        } catch (Exception e) {
-            log.error("Failed to convert " + field + " (" + value + "): " +
-                    manufacturer.getName() + " " + modelName + " " + manufacturer.getUrl() + e);
-        }
     }
 
 }
