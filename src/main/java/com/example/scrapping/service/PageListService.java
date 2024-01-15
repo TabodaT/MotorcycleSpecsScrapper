@@ -32,17 +32,17 @@ public class PageListService {
     // START HERE
     public void startScrapping() {
         try {
-//            storeModelsToDataBaseService.updateUserId();
-            getListOfManufacturers();
-            getModels();
-            getModelsDetails(); // no need for now
+            storeModelsToDataBaseService.getAllUserNames();
+//            getListOfManufacturers();
+//            getModels();
+//            getModelsDetailsAndAddToDB(); // no need for now
         } catch (Exception e) {
             log.error("Something is wrong: " + e);
         }
 
     }
 
-    private void getModelsDetails() throws IOException {
+    private void getModelsDetailsAndAddToDB() throws IOException {
         for (Manufacturer manufacturer : listOfManufacturers) {
             modelDetailsService.getModelDetails(manufacturer);
         }
@@ -97,6 +97,7 @@ public class PageListService {
 //                        System.out.println(cell.getTextContent());
                             cellNr++;
                         }
+                        if (productionYears.isEmpty()) continue;
 
                         Model model = new Model(modelName, url, productionYears);
 

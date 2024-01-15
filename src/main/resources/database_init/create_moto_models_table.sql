@@ -17,7 +17,7 @@ CREATE TABLE `moto_models` (
   `seat_height` int,
   `dry_weight` int,
   `wet_weight` int,
-  `fuel_capacity` int,
+  `fuel_capacity` double,
   `reserve` varchar(100),
   `consumption` double,
   `cooling_system` varchar(100),

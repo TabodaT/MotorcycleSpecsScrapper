@@ -13,21 +13,21 @@ public class MotoModelDTO {
     private String make;
     private String model;
     private int year;
-    private int end_year;
+    private int endYear;
     private String engine;
     private int capacity;   // cc
     private int power;  // kw
     private String clutch;
-    private int torque;
+    private int torque; // nm
     private boolean abs;
-    private String transmission;
+    private String transmission;    // speed
     private String finalDrive;
     private int seatHeight; // mm
     private int dryWeight;  // kg
     private int wetWeight;  // kg
-    private int fuelCapacity; // Litres
+    private double fuelCapacity; // Litres
     private int reserve;
-    private double consumption;
+    private double consumption; // l/100km
     private String coolingSystem;
     private int top_speed; // km/h
     private String url;
@@ -40,7 +40,7 @@ public class MotoModelDTO {
         Field[] fields = c.getDeclaredFields();
         Map<String, Object> temp = new HashMap<>();
 
-        for( Field field : fields ){
+        for (Field field : fields) {
             try {
                 temp.put(field.getName(), field.get(this));
             } catch (IllegalArgumentException | IllegalAccessException e1) {
@@ -51,14 +51,29 @@ public class MotoModelDTO {
         for (Map.Entry<String, Object> entry : temp.entrySet()) {
             Object value = entry.getValue();
 
-            if ((value instanceof String && !((String) value).isEmpty()) || (value instanceof Integer && (Integer) value != 0)) {
+            if ((value instanceof String && !((String) value).isEmpty() && !value.equals("0")) ||
+                    (value instanceof Integer && (Integer) value != 0) ||
+                    value instanceof Double && (Double) value != 0) {
                 listOfNotNullFields.add(entry.getKey());
             }
         }
 
         Collections.sort(listOfNotNullFields);
-        for (String field : listOfNotNullFields){
-            sb.append(field).append(":\t").append(temp.get(field)).append("\n");
+        for (String field : listOfNotNullFields) {
+            sb.append(field).append(":\t").append(temp.get(field));
+            switch (field) {
+                case "seatHeight" -> sb.append("mm");
+                case "dryWeight", "wetWeight" -> sb.append("kg");
+                case "fuelCapacity" -> sb.append("Litres");
+                case "capacity" -> sb.append("cc");
+                case "power" -> sb.append("kw");
+                case "top_speed" -> sb.append("km/h");
+                case "torque" -> sb.append("nm");
+                case "transmission" -> sb.append(" speed");
+                case "consumption" -> sb.append("l/100km");
+            }
+
+            sb.append("\n");
         }
 
         return sb.toString();

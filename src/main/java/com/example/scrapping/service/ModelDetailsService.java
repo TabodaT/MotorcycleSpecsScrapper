@@ -62,12 +62,14 @@ public class ModelDetailsService {
             MotoModelDTO motoModelDTO = motoModelsMapper.mapMotoModel(listOfSpecName,listOfSpecValue, manufacturer, model, imageFile);
             System.out.println(motoModelDTO); // to be deleted
 
+
+
             listOfSpecName.clear();
             listOfSpecValue.clear();
             imageLink = "";
             imageFile = "";
         }
-        listOfSpecName.forEach(System.out::println);
+//        listOfSpecName.forEach(System.out::println); // to be deleted
     }
 
     private void getImageOfTheModel(HtmlElement table24, String manufacturer, String modelName) {
@@ -185,9 +187,9 @@ public class ModelDetailsService {
 
     private void printScrapedTable() {
         System.out.println("total rows: " + listOfSpecValue.size());
-        for (int i = 0; i < listOfSpecValue.size(); i++) {
-            System.out.println((i + 1) + ".\t" + listOfSpecName.get(i) + "\t" + listOfSpecValue.get(i));
-        }
-        System.out.println("--------------------------");
+//        for (int i = 0; i < listOfSpecValue.size(); i++) {
+//            System.out.println((i + 1) + ".\t" + listOfSpecName.get(i) + "\t" + listOfSpecValue.get(i));
+//        }
+//        System.out.println("--------------------------");
     }
 }
