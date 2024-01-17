@@ -62,7 +62,7 @@ public class ModelDetailsService {
             MotoModelDTO motoModelDTO = motoModelsMapper.mapMotoModel(listOfSpecName,listOfSpecValue, manufacturer, model, imageFile);
             System.out.println(motoModelDTO); // to be deleted
 
-
+            // here add to DB
 
             listOfSpecName.clear();
             listOfSpecValue.clear();

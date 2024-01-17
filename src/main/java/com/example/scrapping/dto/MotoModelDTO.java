@@ -20,16 +20,16 @@ public class MotoModelDTO {
     private String clutch;
     private int torque; // nm
     private boolean abs;
-    private String transmission;    // speed
+    private int transmission;   // speed
     private String finalDrive;
     private int seatHeight; // mm
     private int dryWeight;  // kg
     private int wetWeight;  // kg
     private double fuelCapacity; // Litres
-    private int reserve;
+    private int reserve;    // l
     private double consumption; // l/100km
     private String coolingSystem;
-    private int top_speed; // km/h
+    private int topSpeed; // km/h
     private String url;
     private String image;
 
@@ -71,6 +71,7 @@ public class MotoModelDTO {
                 case "torque" -> sb.append("nm");
                 case "transmission" -> sb.append(" speed");
                 case "consumption" -> sb.append("l/100km");
+                case "reserve" -> sb.append("l");
             }
 
             sb.append("\n");

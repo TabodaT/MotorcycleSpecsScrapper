@@ -67,8 +67,8 @@ public class MotoModelsMapper {
             //   abs
             motoModelDTO.setAbs(Boolean.parseBoolean(getSpecValue("abs")));
             //   transmission
-            motoModelDTO.setTransmission(getSpecValue("transmission"));
-            if (containsSpec && motoModelDTO.getTransmission().equals("0"))
+            motoModelDTO.setTransmission(Integer.parseInt(getSpecValue("transmission")));
+            if (containsSpec && motoModelDTO.getTransmission() == 0)
                 log.error("transmission " + modelName + " is missing spec" + " " + model.getUrl()); // to be deleted
             //   final_drive
             motoModelDTO.setFinalDrive(getSpecValue("drive"));
@@ -109,8 +109,8 @@ public class MotoModelsMapper {
             if (containsSpec && motoModelDTO.getCoolingSystem().equals("0"))
                 log.error("cooling " + modelName + " is missing spec" + " " + model.getUrl()); // to be deleted
             //   top_speed
-            motoModelDTO.setTop_speed(Integer.parseInt(getSpecValue("speed")));
-            if (containsSpec && motoModelDTO.getTop_speed() == 0)
+            motoModelDTO.setTopSpeed(Integer.parseInt(getSpecValue("speed")));
+            if (containsSpec && motoModelDTO.getTopSpeed() == 0)
                 log.error("speed " + modelName + " is missing spec" + " " + model.getUrl()); // to be deleted
         }
         return motoModelDTO;

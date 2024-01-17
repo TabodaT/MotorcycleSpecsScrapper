@@ -5,8 +5,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.apache.logging.log4j.util.StackLocator.getInstance;
-
 public class Manufacturer extends MotoListing {
     private HashSet<Model> modelsList;
 

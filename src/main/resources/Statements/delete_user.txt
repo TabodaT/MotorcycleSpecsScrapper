@@ -1,0 +1,1 @@
+insert into user(id,fullname,email,password) values(

@@ -32,7 +32,7 @@ public class PageListService {
     // START HERE
     public void startScrapping() {
         try {
-            storeModelsToDataBaseService.getAllUserNames();
+            storeModelsToDataBaseService.insertMoto();
 //            getListOfManufacturers();
 //            getModels();
 //            getModelsDetailsAndAddToDB(); // no need for now
