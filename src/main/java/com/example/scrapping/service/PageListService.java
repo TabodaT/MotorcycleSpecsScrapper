@@ -27,15 +27,15 @@ public class PageListService {
     @Autowired
     ModelDetailsService modelDetailsService;
     @Autowired
-    StoreModelsToDataBaseService storeModelsToDataBaseService;
+    ModelsToDataBaseService modelsToDataBaseService;
 
     // START HERE
     public void startScrapping() {
         try {
-            storeModelsToDataBaseService.insertMoto();
-//            getListOfManufacturers();
-//            getModels();
-//            getModelsDetailsAndAddToDB(); // no need for now
+//            modelsToDataBaseService.existsInDB("test");
+            getListOfManufacturers();
+            getModels();
+            getModelsDetailsAndAddToDB(); // no need for now
         } catch (Exception e) {
             log.error("Something is wrong: " + e);
         }
@@ -85,6 +85,10 @@ public class PageListService {
                         String productionYears = "";
                         String semiLink = anchor.getAttribute("href");
                         String url = composeUrlOfModel(manufacturer, semiLink);
+
+                        // check if model already exists in DB
+                        if (modelsToDataBaseService.existsInDB(url)) continue;
+
                         List<HtmlTableCell> cells = item.getByXPath(".//td");
                         int cellNr = 1;
                         for (HtmlElement cell : cells) {
@@ -119,9 +123,9 @@ public class PageListService {
             }
 //            modelDetailsService.getModelDetails(manufacturer);
 
-            System.out.println("Here1");// to be deleted
+//            System.out.println("Here1");// to be deleted
         }
-        System.out.println("Here2");// to be deleted
+//        System.out.println("Here2");// to be deleted
     }
 
     private String getNextButtonUrl(HtmlPage page) {

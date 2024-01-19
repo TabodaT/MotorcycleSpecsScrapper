@@ -10,6 +10,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -23,8 +24,12 @@ import java.util.*;
 @Service
 @Slf4j
 public class ModelDetailsService {
-    private List<String> listOfSpecName;
-    private List<String> listOfSpecValue;
+
+    @Autowired
+    ModelsToDataBaseService modelsToDataBaseService;
+
+    private final List<String> listOfSpecName;
+    private final List<String> listOfSpecValue;
     private String imageLink = "";
     private String imageFile = "";
 
@@ -59,10 +64,26 @@ public class ModelDetailsService {
             printScrapedTable(); // to be deleted
 
             MotoModelsMapper motoModelsMapper = new MotoModelsMapper();
-            MotoModelDTO motoModelDTO = motoModelsMapper.mapMotoModel(listOfSpecName,listOfSpecValue, manufacturer, model, imageFile);
+            MotoModelDTO motoModelDTO = new MotoModelDTO();
+
+            try {
+                motoModelDTO = motoModelsMapper.mapMotoModel(listOfSpecName, listOfSpecValue, manufacturer, model, imageFile);
+            } catch (Exception e) {
+                System.out.println(Arrays.toString(e.getStackTrace()));
+                System.out.println(manufacturer.getName() + " " + model.getName());
+            }
             System.out.println(motoModelDTO); // to be deleted
 
-            // here add to DB
+            if (!motoModelsMapper.hasErrors && !motoModelDTO.getModel().isEmpty()) {
+                boolean wasInserted = false;
+                String manufModelURL = manufacturer.getUrl() + " " + model.getName() + " " + model.getUrl();
+                try {
+                    wasInserted = modelsToDataBaseService.insertMoto(motoModelDTO) == 1;
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+                System.out.println((wasInserted ? "Inserted " : "Not inserted "));
+            }
 
             listOfSpecName.clear();
             listOfSpecValue.clear();
@@ -79,7 +100,7 @@ public class ModelDetailsService {
         for (HtmlElement img : images) {
             String imgLink = img.getAttribute("src");
 //            System.out.println(imgLink); // to be deleted
-            boolean foundImage = findModelOrManufNameInImageLink(imgLink,modelName,manufacturerNameNoSpaces);
+            boolean foundImage = findModelOrManufNameInImageLink(imgLink, modelName, manufacturerNameNoSpaces);
 
             if (foundImage) {
                 imageLink = imgLink.replaceAll("../../", Constants.MOTORCYCLESPECS_CO_ZA);
@@ -90,7 +111,7 @@ public class ModelDetailsService {
         }
     }
 
-    private boolean findModelOrManufNameInImageLink(String link, String modelName, String manufName){
+    private boolean findModelOrManufNameInImageLink(String link, String modelName, String manufName) {
         String formattedImgLink = link.replace("%20", "").replace("-", "");
         if (formattedImgLink.toLowerCase().contains(manufName)) {
             imageFile = formattedImgLink.substring(formattedImgLink.lastIndexOf("/") + 1);
@@ -99,8 +120,9 @@ public class ModelDetailsService {
         }
         String[] modelNameWords = removeAllNotLettersNumbersOrSpace(modelName).split(" ");
         String imageJPG = formattedImgLink.substring(formattedImgLink.lastIndexOf("/"));
-        for (String wordOfModelName : modelNameWords){
-            if (wordOfModelName.length()>2 && imageJPG.toLowerCase().contains(wordOfModelName.toLowerCase()));{
+        for (String wordOfModelName : modelNameWords) {
+            if (wordOfModelName.length() > 2 && imageJPG.toLowerCase().contains(wordOfModelName.toLowerCase())) ;
+            {
                 imageFile = formattedImgLink.substring(formattedImgLink.lastIndexOf("/") + 1);
                 System.out.println("formattedImgLink: " + formattedImgLink); // to be deleted
                 return true;
@@ -109,15 +131,16 @@ public class ModelDetailsService {
         return false;
     }
 
-    private String removeAllNotLettersNumbersOrSpace(String text){
+    private String removeAllNotLettersNumbersOrSpace(String text) {
         StringBuilder result = new StringBuilder();
-        for (int i=0; i<text.length();i++){
-            if (Character.isDigit(text.charAt(i)) || Character.isLetter(text.charAt(i)) || text.charAt(i)==' '){
+        for (int i = 0; i < text.length(); i++) {
+            if (Character.isDigit(text.charAt(i)) || Character.isLetter(text.charAt(i)) || text.charAt(i) == ' ') {
                 result.append(text.charAt(i));
             }
         }
         return result.toString();
     }
+
     private void savePicturesOfModels(String imageLink, String manufacturer, String model) throws IOException {
         String allManufacturersFolder = "D:/Learning/Projects/Scrapping Projects/MotorcycleSpecsScrapper/Scrapped Images DB";
         String picturesPathBase = allManufacturersFolder + "/" + manufacturer;
@@ -126,11 +149,11 @@ public class ModelDetailsService {
 
         File directoryPath = new File(allManufacturersFolder);
         List<String> manufacturersFolders = Arrays.asList(Objects.requireNonNull(directoryPath.list()));
-        if (manufacturersFolders.contains(manufacturer)){
+        if (manufacturersFolders.contains(manufacturer)) {
             File filesPath = new File(picturesPathBase);
             List<String> images = Arrays.asList(Objects.requireNonNull(filesPath.list()));
             if (images.contains(imageFile)) {
-                System.out.println("Image exists!");  // to be deleted
+//                System.out.println("Image exists!");  // to be deleted
                 return;
             }
         }

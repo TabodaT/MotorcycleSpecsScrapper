@@ -12,41 +12,24 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class StoreModelsToDataBaseService {
+public class ModelsToDataBaseService {
     @Autowired
     UserRepository userRepository;
     @Autowired
     MotoModelsRepository motoModelsRepository;
 
-    public void insertMoto(){
-        MotoModelDTO motoModelDTO1 = new MotoModelDTO();
-        motoModelDTO1.setMake("test");
-        motoModelDTO1.setModel("test");
-        motoModelDTO1.setYear(1);
-        motoModelDTO1.setEndYear(1);
-        motoModelDTO1.setEngine("test");
-        motoModelDTO1.setCapacity(1);
-        motoModelDTO1.setPower(1);
-        motoModelDTO1.setClutch("test");
-        motoModelDTO1.setTorque(1);
-        motoModelDTO1.setAbs(true);
-        motoModelDTO1.setTransmission(1);
-        motoModelDTO1.setFinalDrive("test");
-        motoModelDTO1.setSeatHeight(1);
-        motoModelDTO1.setDryWeight(1);
-        motoModelDTO1.setWetWeight(1);
-        motoModelDTO1.setFuelCapacity(1);
-        motoModelDTO1.setReserve(1);
-        motoModelDTO1.setConsumption(1);
-        motoModelDTO1.setCoolingSystem("test");
-        motoModelDTO1.setTopSpeed(1);
-        motoModelDTO1.setUrl("test");
-        motoModelDTO1.setImage("test");
-
-        motoModelsRepository.insertMoto(motoModelDTO1);
+    // Create
+    public int insertMoto(MotoModelDTO motoModelDTO){
+        return motoModelsRepository.insertMoto(motoModelDTO);
     }
 
-
+    // Read
+    public boolean existsInDB(String url){
+        return motoModelsRepository.queryCountByUrl(url) != 0;
+    }
+    // Update
+    // Delete
+    // Auxiliary
 
 
 
