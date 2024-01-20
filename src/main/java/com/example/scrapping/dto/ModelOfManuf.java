@@ -3,13 +3,12 @@ package com.example.scrapping.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
-public class Model extends MotoListing implements Comparable<Model>{
+public class ModelOfManuf extends MotoListing implements Comparable<ModelOfManuf>{
     private String productionYears;
-    public Model(String name, String url, String productionYears) {
+    private boolean inserted = false;
+    public ModelOfManuf(String name, String url, String productionYears) {
         super(name, url);
         this.productionYears = productionYears;
     }
@@ -18,9 +17,9 @@ public class Model extends MotoListing implements Comparable<Model>{
     public boolean equals(Object o) {
         if (o == this) return true;
 
-        if (!(o instanceof Model)) return false;
+        if (!(o instanceof ModelOfManuf)) return false;
 
-        Model c = (Model) o;
+        ModelOfManuf c = (ModelOfManuf) o;
 
         return this.getName().equals(c.getName()) &&
                 this.getUrl().equals(c.getUrl());
@@ -39,7 +38,7 @@ public class Model extends MotoListing implements Comparable<Model>{
     }
 
     @Override
-    public int compareTo(Model o) {
+    public int compareTo(ModelOfManuf o) {
         return this.toString().compareTo(o.toString());
     }
 

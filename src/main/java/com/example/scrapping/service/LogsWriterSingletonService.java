@@ -1,34 +1,40 @@
 package com.example.scrapping.service;
 
+import com.example.scrapping.Constants.Constants;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class WriteErrorsLogSingletonService {
-    public WriteErrorsLogSingletonService() {}
-    private static WriteErrorsLogSingletonService instance;
+public class LogsWriterSingletonService {
+    public LogsWriterSingletonService() {}
+    private static LogsWriterSingletonService instance;
 
-    public static WriteErrorsLogSingletonService getInstance(){
+    public static LogsWriterSingletonService getInstance(){
         if (instance == null){
-            instance = new WriteErrorsLogSingletonService();
+            instance = new LogsWriterSingletonService();
         }
         return instance;
     }
 
-    private static final String writeTo = "src/main/resources/errors_log.txt";
+    public void logError(String error) throws IOException {
+        addToLog(error, Constants.ERRORS_LOG_TXT_FILE);
+    }
 
-    public void addToErrorsLog(String errors) throws IOException {
+    public void logInsertedMotos(String motos) throws IOException {
+        addToLog(motos, Constants.INSERTED_MODELS_JSON_LOG_FILE);
+    }
+
+    private void addToLog(String errors, String file) throws IOException {
         FileWriter fw = null;
         BufferedWriter bw = null;
         PrintWriter pw = null;
         try {
-            fw = new FileWriter(writeTo, true);
+            fw = new FileWriter(file, true);
             bw = new BufferedWriter(fw);
             pw = new PrintWriter(bw);
-
             pw.println(errors);
-
             pw.flush();
         } finally {
             try {
@@ -38,7 +44,6 @@ public class WriteErrorsLogSingletonService {
             } catch (IOException io) {
                 System.out.println(io);
             }
-
         }
     }
 }

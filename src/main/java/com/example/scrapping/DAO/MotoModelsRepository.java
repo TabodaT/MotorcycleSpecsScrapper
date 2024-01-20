@@ -53,12 +53,13 @@ public class MotoModelsRepository {
         int motoModelCount = 0;
         try {
             motoModelCount = jdbcTemplate.queryForObject(sql, Integer.class);
-        }catch (DataAccessException e){
+        } catch (DataAccessException e) {
             System.out.println(e);
         }
-        System.out.println(motoModelCount);
+        System.out.println(motoModelCount == 0 ? "Not in DB" : "Exists in DB");
         return motoModelCount;
     }
+
     // Update
     // Delete
     // Auxiliary

@@ -15,21 +15,21 @@ public class MotoModelDTO {
     private int year;
     private int endYear;
     private String engine;
-    private int capacity;   // cc
-    private int power;  // kw
+    private double capacity;   // cc
+    private double power;  // kw
     private String clutch;
-    private int torque; // nm
+    private double torque; // nm
     private boolean abs;
     private int transmission;   // speed
     private String finalDrive;
     private int seatHeight; // mm
-    private int dryWeight;  // kg
-    private int wetWeight;  // kg
+    private double dryWeight;  // kg
+    private double wetWeight;  // kg
     private double fuelCapacity; // Litres
-    private int reserve;    // l
+    private double reserve;    // l
     private double consumption; // l/100km
     private String coolingSystem;
-    private int topSpeed; // km/h
+    private double topSpeed; // km/h
     private String url;
     private String image;
 

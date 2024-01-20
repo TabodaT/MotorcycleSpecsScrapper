@@ -1,2 +1,14 @@
-21:59:04|17/01/24:  SS100 is missing spec https://www.motorcyclespecs.co.za/model/Individual/Brough_Superior_SS100.html
-
+14:34:15|20/01/24: transmission AJS 7R 350 Track Racer is missing spec https://www.motorcyclespecs.co.za/model/AJS/AJS%20R7%20Track%20Racer.htm
+14:51:06|20/01/24: capacity AJS Model 18 500 (S, CS, Statesman) is missing spec https://www.motorcyclespecs.co.za/model/AJS/ajs_185_500cc.htm
+404 model page not found: Aprilia SMV 1200 Dorsoduro https://www.motorcyclespecs.co.za/model/Aprilia/aprilia-sm-1200-dorsoduro-13.html
+404 model page not found: Aprilia RSV 1000 Mille R Haga Replica https://www.motorcyclespecs.co.za/model/Aprilia/aprilia-rsv-1000-mille-r-haga-01.html
+404 model page not found: Aprilia SMV 750 Dorsoduro https://www.motorcyclespecs.co.za/model/Aprilia/aprilia-sm-750-dorsoduro-15.html
+404 model page not found: Aprilia RSV4 R APRC https://www.motorcyclespecs.co.za/model/Aprilia/aprilia-rsv-4-aprc--14.html
+404 model page not found: Aprilia RX 125R https://www.motorcyclespecs.co.za/model/Aprilia/aprilia-rx-125-08.html
+404 model page not found: Aprilia Tuono 660 Concept https://www.motorcyclespecs.co.za/model/Aprilia/aprilia-tuono-660-concept.html
+404 model page not found: Aprilia Tuareg 250 Rally https://www.motorcyclespecs.co.za/model/Aprilia/aprilia-tuareg-250-rally-84.html
+404 model page not found: Aprilia Pegaso 650ie https://www.motorcyclespecs.co.za/model/Aprilia/aprilia-pegaso-650ie.htm
+404 model page not found: Aprilia Tuono V4 R APRC https://www.motorcyclespecs.co.za/model/Aprilia/aprilia-tuono-v4-r%20aprc-14.html
+404 model page not found: Aprilia Pegaso 650 Factory https://www.motorcyclespecs.co.za/model/Aprilia/aprilia-pegaso-650-factory-12.html
+404 model page not found: Aprilia RSV4 X 1100 Limited Edition https://www.motorcyclespecs.co.za/model/Aprilia/aprilia-rsv-4-x.html
+404 model page not found: Aprilia NA Mana 850GT https://www.motorcyclespecs.co.za/model/Aprilia/aprilia-mana-850gt-15.html

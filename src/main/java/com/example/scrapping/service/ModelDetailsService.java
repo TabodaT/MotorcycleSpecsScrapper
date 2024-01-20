@@ -2,9 +2,10 @@ package com.example.scrapping.service;
 
 import com.example.scrapping.Constants.Constants;
 import com.example.scrapping.dto.Manufacturer;
-import com.example.scrapping.dto.Model;
+import com.example.scrapping.dto.ModelOfManuf;
 import com.example.scrapping.dto.MotoModelDTO;
 import com.example.scrapping.mappers.MotoModelsMapper;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -32,6 +33,7 @@ public class ModelDetailsService {
     private final List<String> listOfSpecValue;
     private String imageLink = "";
     private String imageFile = "";
+    private LogsWriterSingletonService logsWriterSingletonService = LogsWriterSingletonService.getInstance();
 
     public ModelDetailsService() {
         this.listOfSpecName = new ArrayList<>();
@@ -45,11 +47,21 @@ public class ModelDetailsService {
         int modelsCounter = 1;
         int nrOfModels = manufacturer.getModelsList().size();
 
-        for (Model model : manufacturer.getModelsList()) {
-            System.out.println(modelsCounter + "/" + nrOfModels + ": " + model.getName());
+        for (ModelOfManuf modelOfManuf : manufacturer.getModelsList()) {
+            System.out.println(modelsCounter + "/" + nrOfModels + ": " + modelOfManuf.getName() +
+                    " (" + modelOfManuf.getProductionYears() + ") " +
+                    modelOfManuf.getUrl());
             modelsCounter++;
+            HtmlPage page;
 
-            HtmlPage page = client.getPage(model.getUrl());
+            try {
+                page = client.getPage(modelOfManuf.getUrl());
+            } catch (FailingHttpStatusCodeException e){
+                logsWriterSingletonService.logError("404 model page not found: " + manufacturer.getName()+" "+
+                        modelOfManuf.getName()+" "+modelOfManuf.getUrl());
+                System.out.println(e);
+                continue;
+            }
 
             HtmlElement table24;
             try {
@@ -57,8 +69,8 @@ public class ModelDetailsService {
             } catch (Exception e) {
                 continue;
             }
-            getImageOfTheModel(table24, manufacturer.getName(), model.getName());
-            savePicturesOfModels(imageLink, manufacturer.getName(), model.getName());
+            getImageOfTheModel(table24, manufacturer.getName(), modelOfManuf.getName());
+            savePicturesOfModels(imageLink, manufacturer.getName(), modelOfManuf.getName());
             getDataFromTable(table24);
 
             printScrapedTable(); // to be deleted
@@ -67,22 +79,23 @@ public class ModelDetailsService {
             MotoModelDTO motoModelDTO = new MotoModelDTO();
 
             try {
-                motoModelDTO = motoModelsMapper.mapMotoModel(listOfSpecName, listOfSpecValue, manufacturer, model, imageFile);
+                motoModelDTO = motoModelsMapper.mapMotoModel(listOfSpecName, listOfSpecValue, manufacturer, modelOfManuf, imageFile);
             } catch (Exception e) {
                 System.out.println(Arrays.toString(e.getStackTrace()));
-                System.out.println(manufacturer.getName() + " " + model.getName());
+                System.out.println(manufacturer.getName() + " " + modelOfManuf.getName());
             }
             System.out.println(motoModelDTO); // to be deleted
 
             if (!motoModelsMapper.hasErrors && !motoModelDTO.getModel().isEmpty()) {
                 boolean wasInserted = false;
-                String manufModelURL = manufacturer.getUrl() + " " + model.getName() + " " + model.getUrl();
+                String manufModelURL = manufacturer.getUrl() + " " + modelOfManuf.getName()+ " " + modelOfManuf.getProductionYears() + " " + modelOfManuf.getUrl();
                 try {
                     wasInserted = modelsToDataBaseService.insertMoto(motoModelDTO) == 1;
                 } catch (Exception e) {
-                    System.out.println(e);
+                    System.out.println("Error inserting in DB for " + manufModelURL + " " + e);
                 }
                 System.out.println((wasInserted ? "Inserted " : "Not inserted "));
+                modelOfManuf.setInserted(wasInserted);
             }
 
             listOfSpecName.clear();

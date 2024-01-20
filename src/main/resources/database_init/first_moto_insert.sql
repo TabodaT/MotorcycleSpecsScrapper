@@ -1,11 +1,19 @@
 USE `motorcycles`;
 
 select * from moto_models
+where make = 'AJS' order by model asc
+select count(*) from moto_models 
+where make = 'AJS'
 
 insert into 
-moto_models(id,make,model,capacity,power) 
-values (1,'BMW','R 1200gs','1200','81kw');
+moto_models(make,year,end_year,model,capacity,power) 
+values ('BMW',2010,2012,'R 1200gs','1200',81);
+insert into moto_models(make,model,year,end_year,engine,capacity,power,clutch,torque,abs,transmission,final_drive,seat_height,dry_weight,wet_weight,fuel_capacity,reserve,consumption,cooling_system,top_speed,url,image) values('test','test',1,1,'test',1,1,'test',1,true,1,'test',1,1,1,1.0,1,1.0,'test',1,'test','test')
 
+delete from moto_models where id in (2)
+
+select count(*) from moto_models where url = 'test';
+where year <= 2012 and end_year >= 2012
 
 update moto_models
 set capacity = '1170'
@@ -22,7 +30,7 @@ insert into user(fullname,email,password) values('name1','email1','password1');
 select * from user where id in (1,2)
 
 delete from user where id not in (1)
-delete from user where id in (1)
+delete from user where id in (2)
 
 select * from user ORDER BY id DESC LIMIT 1
 

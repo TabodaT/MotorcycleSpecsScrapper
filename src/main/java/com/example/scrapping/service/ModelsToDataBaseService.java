@@ -3,7 +3,7 @@ package com.example.scrapping.service;
 import com.example.scrapping.DAO.MotoModelsRepository;
 import com.example.scrapping.DAO.UserRepository;
 import com.example.scrapping.dto.Manufacturer;
-import com.example.scrapping.dto.Model;
+import com.example.scrapping.dto.ModelOfManuf;
 import com.example.scrapping.dto.MotoModelDTO;
 import com.example.scrapping.dto.UserDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +49,7 @@ public class ModelsToDataBaseService {
 
 
 
-    public void getAllUserNames(Manufacturer manufacturer, Model model){
+    public void getAllUserNames(Manufacturer manufacturer, ModelOfManuf modelOfManuf){
         System.out.println(userRepository.getAllUserNames());
     }
 

@@ -1,9 +1,9 @@
 package com.example.scrapping.mappers;
 
 import com.example.scrapping.dto.Manufacturer;
-import com.example.scrapping.dto.Model;
+import com.example.scrapping.dto.ModelOfManuf;
 import com.example.scrapping.dto.MotoModelDTO;
-import com.example.scrapping.service.WriteErrorsLogSingletonService;
+import com.example.scrapping.service.LogsWriterSingletonService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,31 +26,32 @@ public class MotoModelsMapper {
     private String modelProductionYears;
     private String endYear = "0";
     private boolean containsSpec;
-    private Model model;
+    private ModelOfManuf modelOfManuf;
     public boolean hasErrors;
 
-    public MotoModelDTO mapMotoModel(List<String> listOfSpecName, List<String> listOfSpecValue, Manufacturer manufacturer, Model model, String imageFile) {
+    public MotoModelDTO mapMotoModel(List<String> listOfSpecName, List<String> listOfSpecValue, Manufacturer manufacturer, ModelOfManuf modelOfManuf, String imageFile) {
         this.listOfSpecName = listOfSpecName;
         this.listOfSpecValue = listOfSpecValue;
         this.manufacturer = manufacturer;
-        this.model = model;
-        this.modelProductionYears = model.getProductionYears();
+        this.modelOfManuf = modelOfManuf;
+        this.modelProductionYears = modelOfManuf.getProductionYears();
 
         MotoModelDTO motoModelDTO = new MotoModelDTO();
-        String modelName = model.getName();
+        String modelName = modelOfManuf.getName();
 
         //   make
         motoModelDTO.setMake(manufacturer.getName());
         //   model
-        motoModelDTO.setModel(model.getName());
+        motoModelDTO.setModel(modelOfManuf.getName());
         //   year
         motoModelDTO.setYear(Integer.parseInt(getSpecValue("year")));
+        motoModelDTO.setEndYear(Integer.parseInt(this.endYear));
         if (containsSpec && motoModelDTO.getYear() == 0)
-            log.error("year " + modelName + " is missing spec" + " " + model.getUrl()); // to be deleted
+            log.error("year " + modelName + " is missing spec" + " " + modelOfManuf.getUrl()); // to be deleted
         //   end_year
         motoModelDTO.setYear(Integer.parseInt(endYear));
         //   url
-        motoModelDTO.setUrl(model.getUrl());
+        motoModelDTO.setUrl(modelOfManuf.getUrl());
         //   image
         motoModelDTO.setImage(imageFile);
 
@@ -60,11 +61,11 @@ public class MotoModelsMapper {
             if (containsSpec && motoModelDTO.getEngine().equals("0"))
                 logError("engine");
             //   capacity
-            motoModelDTO.setCapacity(Integer.parseInt(getSpecValue("capacity")));
+            motoModelDTO.setCapacity(Double.parseDouble(getSpecValue("capacity")));
             if (containsSpec && motoModelDTO.getCapacity() == 0)
                 logError("capacity");
             //   power
-            motoModelDTO.setPower(Integer.parseInt(getSpecValue("power")));
+            motoModelDTO.setPower(Double.parseDouble(getSpecValue("power")));
             if (containsSpec && motoModelDTO.getPower() == 0)
                 logError("power");
             //   clutch
@@ -72,7 +73,7 @@ public class MotoModelsMapper {
             if (containsSpec && motoModelDTO.getClutch().equals("0"))
                 logError("clutch");
             //   torque
-            motoModelDTO.setTorque(Integer.parseInt(getSpecValue("torque")));
+            motoModelDTO.setTorque(Double.parseDouble(getSpecValue("torque")));
             if (containsSpec && motoModelDTO.getTorque() == 0)
                 logError("torque");
             //   abs
@@ -90,13 +91,13 @@ public class MotoModelsMapper {
             if (containsSpec && motoModelDTO.getSeatHeight() == 0)
                 logError("seat");
             //   dry_weight
-            motoModelDTO.setDryWeight(Integer.parseInt(getSpecValue("dry")));
+            motoModelDTO.setDryWeight(Double.parseDouble(getSpecValue("dry")));
             if (containsSpec && motoModelDTO.getDryWeight() == 0)
                 logError("dry");
             //   wet_weight
-            motoModelDTO.setDryWeight(Integer.parseInt(getSpecValue("wet")));
+            motoModelDTO.setDryWeight(Double.parseDouble(getSpecValue("wet")));
             if (motoModelDTO.getDryWeight() == 0 && motoModelDTO.getWetWeight() == 0) {
-                motoModelDTO.setDryWeight(Integer.parseInt(getSpecValue("weight")));
+                motoModelDTO.setDryWeight(Double.parseDouble(getSpecValue("weight")));
             }
             if (containsSpec && motoModelDTO.getWetWeight() == 0 && motoModelDTO.getDryWeight() == 0)
                 logError("wet");
@@ -108,7 +109,7 @@ public class MotoModelsMapper {
             if (containsSpec && motoModelDTO.getFuelCapacity() == 0)
                 logError("fuel capacity");
             //   reserve
-            motoModelDTO.setReserve(Integer.parseInt(getSpecValue("reserve")));
+            motoModelDTO.setReserve(Double.parseDouble(getSpecValue("reserve")));
             if (containsSpec && motoModelDTO.getReserve() == 0)
                 logError("reserve");
             //   consumption
@@ -120,7 +121,7 @@ public class MotoModelsMapper {
             if (containsSpec && motoModelDTO.getCoolingSystem().equals("0"))
                 logError("cooling");
             //   top_speed
-            motoModelDTO.setTopSpeed(Integer.parseInt(getSpecValue("speed")));
+            motoModelDTO.setTopSpeed(Double.parseDouble(getSpecValue("speed")));
             if (containsSpec && motoModelDTO.getTopSpeed() == 0)
                 logError("speed");
         }
@@ -129,12 +130,12 @@ public class MotoModelsMapper {
 
     private void logError(String specValue) {
         hasErrors = true;
-        WriteErrorsLogSingletonService writeErrorsLogSingletonService = WriteErrorsLogSingletonService.getInstance();
+        LogsWriterSingletonService logsWriterSingletonService = LogsWriterSingletonService.getInstance();
         String getNow = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss|dd/MM/yy"));
-        String errorString = specValue + " " + manufacturer.getName() + " " + model.getName() + " is missing spec" + " " + model.getUrl();
+        String errorString = specValue + " " + manufacturer.getName() + " " + modelOfManuf.getName() + " is missing spec" + " " + modelOfManuf.getUrl();
         log.error(errorString);
         try {
-            writeErrorsLogSingletonService.addToErrorsLog(getNow + ": " + errorString);
+            logsWriterSingletonService.logError(getNow + ": " + errorString);
         } catch (IOException e) {
             System.out.println(e);
         }
@@ -148,28 +149,24 @@ public class MotoModelsMapper {
             String nameOfSpecAtI = listOfSpecName.get(i).toLowerCase();
             String valueOfSpecAtI = listOfSpecValue.get(i);
             if (nameOfSpecAtI.equals(specName)) {                          // EQUALS
+                containsSpec = true;
                 if (specName.equals("year")) {
-                    containsSpec = true;
                     result = formatYear(valueOfSpecAtI);
                     break;
                 }
                 if (specName.equals("capacity")) {
-                    containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "cc");
                     break;
                 }
                 if (specName.equals("clutch")) {
-                    containsSpec = true;
                     result = valueOfSpecAtI;
                     break;
                 }
                 if (specName.equals("weight")) {
-                    containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "kg");
                     break;
                 }
                 if (specName.equals("fuel capacity") || specName.equals("load capacity")) {
-                    containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "litre");
                     if (result.equals("0")) {
                         result = formatMetricUnit(valueOfSpecAtI, "l");
@@ -177,12 +174,10 @@ public class MotoModelsMapper {
                     break;
                 }
                 if (specName.equals("drive")) {
-                    containsSpec = true;
                     result = valueOfSpecAtI;
                     break;
                 }
                 if (specName.equals("reserve")) {
-                    containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "l");
                     if (result.equals("0")) {
                         result = formatMetricUnit(valueOfSpecAtI, "litre");
@@ -190,13 +185,16 @@ public class MotoModelsMapper {
                     break;
                 }
                 if (specName.equals("consumption")) {
-                    containsSpec = true;
                     result = getConsumption(valueOfSpecAtI);
                     break;
                 }
                 if (specName.equals("transmission")) {
-                    containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "speed");
+                    break;
+                }
+                if (specName.equals("engine")) {
+                    containsSpec = true;
+                    result = valueOfSpecAtI;
                     break;
                 }
             } else if (nameOfSpecAtI.contains(specName)) {                   // CONTAINS
@@ -244,6 +242,9 @@ public class MotoModelsMapper {
                 if (specName.equals("speed")) {
                     containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "km");
+                    if (result.equals("0")) {
+                        result = formatMetricUnit(valueOfSpecAtI, "kph");
+                    }
                     break;
                 }
                 if (specName.equals("consumption")) {
@@ -330,12 +331,30 @@ public class MotoModelsMapper {
         String yearsToBeFormatted = year.isEmpty() ? modelProductionYears : year;
         String[] years = yearsToBeFormatted.trim().replaceAll(" ", "").split("-");
         if (years.length > 0) result = years[0];
+
+        if (years.length == 1 && result.length() == 8) {
+            endYear = result.substring(4);
+            result = result.substring(0, 4);
+            return result;
+        } else if (years.length == 1 && result.length() >8){
+            result = result.substring(0, 4);
+            endYear = result;
+            return result;
+        }
+
         if (years.length == 1) {
             endYear = years[0];
         } else {
             String endYearUnchecked = years[1];
             if (endYearUnchecked.length() == 2) {
-                endYear = "20" + endYearUnchecked;
+                int yearLast2Num = Integer.parseInt(years[0].substring(2));
+                int endInteger = Integer.parseInt(endYearUnchecked);
+                String startYearPrefix = years[0].substring(0, 2);
+                if (Math.max(yearLast2Num, endInteger) == endInteger) {
+                    endYear = startYearPrefix + endYearUnchecked;
+                } else {
+                    endYear = (Integer.parseInt(startYearPrefix) + 1) + endYearUnchecked;
+                }
             } else {
                 endYear = endYearUnchecked;
             }
