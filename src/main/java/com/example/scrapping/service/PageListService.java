@@ -88,10 +88,10 @@ public class PageListService {
         String nextButtonUrl = getNextButtonUrl(page);
 
         boolean canScrapPage = true;
-        int pageCounter = 1; // to be deleted
+        int pageCounter = 1;
         while (canScrapPage) {
             System.out.println("--------------------- Page: " + pageCounter + " ---------------------"); // to be deleted
-            pageCounter++; // to be deleted
+            pageCounter++;
             int modelPerPageCounter = 1;
             List<HtmlElement> items = page.getByXPath("//tr");
             for (int i = 0; i < items.size(); i++) {
@@ -130,7 +130,7 @@ public class PageListService {
                     }
                     if (productionYears.isEmpty()) continue;
 
-                    ModelOfManuf modelOfManuf = new ModelOfManuf(modelName, url, productionYears);
+                    ModelOfManuf modelOfManuf = new ModelOfManuf(modelName, url, productionYears, pageCounter);
                     manufacturer.addModel(modelOfManuf);
 
                     if (modelOfManuf.getUrl().isEmpty()) continue;
@@ -203,12 +203,12 @@ public class PageListService {
 //        linkHalf2 = semiLink.substring(semiLink.lastIndexOf("/") + 1);
 //        linkHalf1 = manufUrl.substring(0, manufUrl.lastIndexOf(".")) + "/";
 
-        if (listOfManufWUrlModel.contains(manufacturer.getName().toLowerCase())) {
-            manufUrl = manufacturer.getUrl(); // weren't here
-            linkHalf2 = semiLink.substring(semiLink.lastIndexOf("/") + 1); // weren't here
-            linkHalf1 = manufUrl.substring(0, manufUrl.lastIndexOf(".")) + "/"; // weren't here
-            linkHalf1 = linkHalf1.replaceFirst("/bikes/", "/model/");
-        }
+//        if (listOfManufWUrlModel.contains(manufacturer.getName().toLowerCase())) {
+//            manufUrl = manufacturer.getUrl(); // weren't here
+//            linkHalf2 = semiLink.substring(semiLink.lastIndexOf("/") + 1); // weren't here
+//            linkHalf1 = manufUrl.substring(0, manufUrl.lastIndexOf(".")) + "/"; // weren't here
+//            linkHalf1 = linkHalf1.replaceFirst("/bikes/", "/model/");
+//        }
         result = linkHalf1 + linkHalf2;
         return result;
     }

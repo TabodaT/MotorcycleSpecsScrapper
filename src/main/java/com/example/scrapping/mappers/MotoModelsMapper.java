@@ -190,6 +190,7 @@ public class MotoModelsMapper {
                 }
                 if (specName.equals("transmission")) {
                     result = formatMetricUnit(valueOfSpecAtI, "speed");
+                    result = result.equals("0") ? "1" : result;
                     break;
                 }
                 if (specName.equals("engine")) {
@@ -275,20 +276,25 @@ public class MotoModelsMapper {
     private String getConsumption(String rawSpecValue) {
         String result = "";
         String preFormat;
-        if (rawSpecValue.toLowerCase().contains("km")) {
-            preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("km")).trim().replaceAll(" ", "").substring(0, rawSpecValue.toLowerCase().indexOf("l"));
-            for (int i = 0; i < preFormat.length(); i++) {
-                char c = preFormat.charAt(i);
-                if (Character.isDigit(c) || c == '.') {
-                    result = result + c;
+        try {
+            if (rawSpecValue.toLowerCase().contains("km")) {
+                preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("km")).trim().replaceAll(" ", "").substring(0, rawSpecValue.toLowerCase().indexOf("l"));
+                for (int i = 0; i < preFormat.length(); i++) {
+                    char c = preFormat.charAt(i);
+                    if (Character.isDigit(c) || c == '.') {
+                        result = result + c;
+                    }
                 }
+            } else if (rawSpecValue.toLowerCase().contains("mpg")) {
+                preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("mpg")).trim().replaceAll(" ", "");
+                result = getNumberFromEndOfString(preFormat);
+                DecimalFormat df = new DecimalFormat("#.#");
+                double lPer100km = 235.21 / Double.parseDouble(result);
+                result = df.format(lPer100km);
             }
-        } else if (rawSpecValue.toLowerCase().contains("mpg")) {
-            preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("mpg")).trim().replaceAll(" ", "");
-            result = getNumberFromEndOfString(preFormat);
-            DecimalFormat df = new DecimalFormat("#.#");
-            double lPer100km = 235.21 / Double.parseDouble(result);
-            result = df.format(lPer100km);
+        } catch (Exception e) {
+            System.out.println("Consumption err: " + e);
+            result = "1";
         }
         return result;
     }
@@ -336,7 +342,7 @@ public class MotoModelsMapper {
             endYear = result.substring(4);
             result = result.substring(0, 4);
             return result;
-        } else if (years.length == 1 && result.length() >8){
+        } else if (years.length == 1 && result.length() > 8) {
             result = result.substring(0, 4);
             endYear = result;
             return result;

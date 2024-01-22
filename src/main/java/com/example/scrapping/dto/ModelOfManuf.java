@@ -8,9 +8,12 @@ import lombok.Setter;
 public class ModelOfManuf extends MotoListing implements Comparable<ModelOfManuf>{
     private String productionYears;
     private boolean inserted = false;
-    public ModelOfManuf(String name, String url, String productionYears) {
+    private int page;
+
+    public ModelOfManuf(String name, String url, String productionYears, int page) {
         super(name, url);
         this.productionYears = productionYears;
+        this.page = page;
     }
 
     @Override

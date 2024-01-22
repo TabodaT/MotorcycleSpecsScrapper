@@ -56,9 +56,9 @@ public class ModelDetailsService {
 
             try {
                 page = client.getPage(modelOfManuf.getUrl());
-            } catch (FailingHttpStatusCodeException e){
-                logsWriterSingletonService.logError("404 model page not found: " + manufacturer.getName()+" "+
-                        modelOfManuf.getName()+" "+modelOfManuf.getUrl());
+            } catch (FailingHttpStatusCodeException e) {
+                logsWriterSingletonService.logError("404 model page not found: page=" + modelOfManuf.getPage() + ". " + manufacturer.getName() + " " +
+                        modelOfManuf.getName() + " " + modelOfManuf.getProductionYears() + " " + modelOfManuf.getUrl());
                 System.out.println(e);
                 continue;
             }
@@ -88,11 +88,13 @@ public class ModelDetailsService {
 
             if (!motoModelsMapper.hasErrors && !motoModelDTO.getModel().isEmpty()) {
                 boolean wasInserted = false;
-                String manufModelURL = manufacturer.getUrl() + " " + modelOfManuf.getName()+ " " + modelOfManuf.getProductionYears() + " " + modelOfManuf.getUrl();
+                String manufModelURL = manufacturer.getUrl() + " " + modelOfManuf.getName() + " " + modelOfManuf.getProductionYears() + " " + modelOfManuf.getUrl();
                 try {
                     wasInserted = modelsToDataBaseService.insertMoto(motoModelDTO) == 1;
                 } catch (Exception e) {
-                    System.out.println("Error inserting in DB for " + manufModelURL + " " + e);
+                    String error = "Error inserting in DB for " + manufModelURL + " " + e;
+                    logsWriterSingletonService.logError(error);
+                    System.out.println(error);
                 }
                 System.out.println((wasInserted ? "Inserted " : "Not inserted "));
                 modelOfManuf.setInserted(wasInserted);
