@@ -16,6 +16,12 @@ public class ModelOfManuf extends MotoListing implements Comparable<ModelOfManuf
         this.page = page;
     }
 
+    public ModelOfManuf(ModelOfManuf model){
+        super(model.getName(),model.getUrl());
+        this.productionYears = model.getProductionYears();
+        this.page = model.getPage();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;

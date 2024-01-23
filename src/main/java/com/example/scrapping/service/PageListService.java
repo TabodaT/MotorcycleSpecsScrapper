@@ -30,6 +30,8 @@ public class PageListService {
     ModelDetailsService modelDetailsService;
     @Autowired
     ModelsToDataBaseService modelsToDataBaseService;
+    LogsWriterSingletonService logsWriterSingletonService;
+    private List<String> ignoreManufacturersList = new ArrayList<>(Arrays.asList("AJP","AJS","Aprilia"));
 
     // START HERE
     public void startScrapping() {
@@ -39,7 +41,7 @@ public class PageListService {
             for (Manufacturer manufacturer : listOfManufacturers) {
                 getModelsOfManuf(manufacturer);
                 getModelsDetailsAndAddToDB(manufacturer); // no need for now
-                logInsertedMotos(manufacturer);
+//                logInsertedMotos(newManuf);
             }
         } catch (Exception e) {
             log.error("Something is wrong: " + e);
@@ -76,7 +78,11 @@ public class PageListService {
         try {
             modelDetailsService.getModelDetails(manufacturer);
         } catch (Exception e) {
-            System.out.println(e);
+            String error = "Some error while getting models details " + manufacturer.getName() + " " + e;
+            try {
+                logsWriterSingletonService.logError(error);
+            } catch (Exception ignored){}
+            System.out.println(error);
         }
     }
 
@@ -180,7 +186,8 @@ public class PageListService {
             if (!startRecordingManufacturersLinks) continue;
 
             String manufName = element.getTextContent();
-            if (manufName.isBlank() || manufName.contains("Complete Manufacturer")) continue;
+            if (manufName.isBlank() || manufName.contains("Complete Manufacturer") ||
+                    ignoreManufacturersList.contains(manufName)) continue;
 
             Manufacturer manufacturer = new Manufacturer(manufName, composeUrlOfManuf(semiLink));
             resultListOfManufacturers.add(manufacturer);

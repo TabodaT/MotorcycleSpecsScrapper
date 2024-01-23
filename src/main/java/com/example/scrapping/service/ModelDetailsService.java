@@ -57,9 +57,7 @@ public class ModelDetailsService {
             try {
                 page = client.getPage(modelOfManuf.getUrl());
             } catch (FailingHttpStatusCodeException e) {
-                logsWriterSingletonService.logError("404 model page not found: page=" + modelOfManuf.getPage() + ". " + manufacturer.getName() + " " +
-                        modelOfManuf.getName() + " " + modelOfManuf.getProductionYears() + " " + modelOfManuf.getUrl());
-                System.out.println(e);
+                logErrorInGetModel(manufacturer, modelOfManuf, "404 model page not found: page=", e);
                 continue;
             }
 
@@ -67,6 +65,7 @@ public class ModelDetailsService {
             try {
                 table24 = page.getHtmlElementById("table24");
             } catch (Exception e) {
+                logErrorInGetModel(manufacturer, modelOfManuf, "table24 not found: page=", e);
                 continue;
             }
             getImageOfTheModel(table24, manufacturer.getName(), modelOfManuf.getName());
@@ -81,8 +80,8 @@ public class ModelDetailsService {
             try {
                 motoModelDTO = motoModelsMapper.mapMotoModel(listOfSpecName, listOfSpecValue, manufacturer, modelOfManuf, imageFile);
             } catch (Exception e) {
-                System.out.println(Arrays.toString(e.getStackTrace()));
-                System.out.println(manufacturer.getName() + " " + modelOfManuf.getName());
+                logErrorInGetModel(manufacturer, modelOfManuf, "Error mapping model: page=", e);
+                continue;
             }
             System.out.println(motoModelDTO); // to be deleted
 
@@ -99,13 +98,24 @@ public class ModelDetailsService {
                 System.out.println((wasInserted ? "Inserted " : "Not inserted "));
                 modelOfManuf.setInserted(wasInserted);
             }
-
-            listOfSpecName.clear();
-            listOfSpecValue.clear();
-            imageLink = "";
-            imageFile = "";
+            clearData();
         }
 //        listOfSpecName.forEach(System.out::println); // to be deleted
+    }
+
+    private void logErrorInGetModel(Manufacturer manufacturer, ModelOfManuf model, String errorText, Exception e) throws IOException {
+        String error = errorText + " " + model.getPage() + ". " + manufacturer.getName() + " " +
+                model.getName() + " " + model.getProductionYears() + " " + model.getUrl() + " " + e;
+        logsWriterSingletonService.logError(error);
+        System.out.println(error);
+        clearData();
+    }
+
+    private void clearData() {
+        listOfSpecName.clear();
+        listOfSpecValue.clear();
+        imageLink = "";
+        imageFile = "";
     }
 
     private void getImageOfTheModel(HtmlElement table24, String manufacturer, String modelName) {
@@ -207,9 +217,9 @@ public class ModelDetailsService {
             if (cells.size() == 2) {
                 int cellNr = 1;
                 for (HtmlElement cell : cells) {
-                    if (cell.getTextContent().contains("Lubrication")) {
-                        System.out.println("Here!!");
-                    }
+//                    if (cell.getTextContent().contains("Lubrication")) {
+//                        System.out.println("Here!!"); // to be deleted
+//                    }
                     String cellText = cell.getTextContent().replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "").replaceAll(" ", "").trim();
                     if (cellNr == 1) {
                         listOfSpecName.add(cellText);
