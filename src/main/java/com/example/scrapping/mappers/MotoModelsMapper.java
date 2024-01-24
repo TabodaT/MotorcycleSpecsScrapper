@@ -17,7 +17,7 @@ import java.util.List;
 @Getter
 public class MotoModelsMapper {
     public MotoModelsMapper() {
-        this.hasErrors = false;
+        this.erroneous = false;
     }
 
     private List<String> listOfSpecName;
@@ -27,9 +27,11 @@ public class MotoModelsMapper {
     private String endYear = "0";
     private boolean containsSpec;
     private ModelOfManuf modelOfManuf;
-    public boolean hasErrors;
+    private boolean erroneous;
+    private final LogsWriterSingletonService logsWriterSingletonService = LogsWriterSingletonService.getInstance();
 
-    public MotoModelDTO mapMotoModel(List<String> listOfSpecName, List<String> listOfSpecValue, Manufacturer manufacturer, ModelOfManuf modelOfManuf, String imageFile) {
+    public MotoModelDTO mapMotoModel(List<String> listOfSpecName, List<String> listOfSpecValue,
+                                     Manufacturer manufacturer, ModelOfManuf modelOfManuf, String imageFile) {
         this.listOfSpecName = listOfSpecName;
         this.listOfSpecValue = listOfSpecValue;
         this.manufacturer = manufacturer;
@@ -44,12 +46,12 @@ public class MotoModelsMapper {
         //   model
         motoModelDTO.setModel(modelOfManuf.getName());
         //   year
-        motoModelDTO.setYear(Integer.parseInt(getSpecValue("year")));
+        motoModelDTO.setStartYear(Integer.parseInt(getSpecValue("year")));
         motoModelDTO.setEndYear(Integer.parseInt(this.endYear));
-        if (containsSpec && motoModelDTO.getYear() == 0)
+        if (containsSpec && motoModelDTO.getStartYear() == 0)
             log.error("year " + modelName + " is missing spec" + " " + modelOfManuf.getUrl()); // to be deleted
         //   end_year
-        motoModelDTO.setYear(Integer.parseInt(endYear));
+        motoModelDTO.setEndYear(Integer.parseInt(endYear));
         //   url
         motoModelDTO.setUrl(modelOfManuf.getUrl());
         //   image
@@ -125,21 +127,25 @@ public class MotoModelsMapper {
             if (containsSpec && motoModelDTO.getTopSpeed() == 0)
                 logError("speed");
         }
+        resetMapper();
         return motoModelDTO;
     }
 
     private void logError(String specValue) {
-        hasErrors = true;
-        LogsWriterSingletonService logsWriterSingletonService = LogsWriterSingletonService.getInstance();
+        erroneous = true;
         String getNow = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss|dd/MM/yy"));
-        String errorString = specValue + " " + manufacturer.getName() + " " + modelOfManuf.getName() + " is missing spec" + " " + modelOfManuf.getUrl();
-        log.error(errorString);
+        StringBuilder errorStringSB = new StringBuilder();
+        errorStringSB.append(specValue).append(", spec is missing from: ")
+                .append("page= ").append(modelOfManuf.getPage()).append(". ")
+                .append(manufacturer.getName()).append(" ")
+                .append(modelOfManuf.getName()).append(" ")
+                .append(modelOfManuf.getUrl());
+        log.error(errorStringSB.toString());
         try {
-            logsWriterSingletonService.logError(getNow + ": " + errorString);
+            logsWriterSingletonService.logError(errorStringSB.insert(0,": ").insert(0, getNow).toString());
         } catch (IOException e) {
             System.out.println(e);
         }
-
     }
 
     private String getSpecValue(String specName) {
@@ -268,9 +274,19 @@ public class MotoModelsMapper {
                     result = "false";
                 }
             }
-
         }
         return result;
+    }
+
+    private void resetMapper(){
+        this.listOfSpecName.clear();
+        this.listOfSpecValue.clear();
+        this.manufacturer = null;
+        this.modelProductionYears = null;
+        this.endYear = "0";
+        this.containsSpec = false;
+        this.modelOfManuf = null;
+        this.erroneous = false;
     }
 
     private String getConsumption(String rawSpecValue) {
@@ -309,7 +325,8 @@ public class MotoModelsMapper {
     }
 
     private String getNumberFromEndOfString(String preFormat) {
-        String result = "";
+//        String result = "";
+        StringBuilder resultSB = new StringBuilder();
         if (preFormat.length() > 1) {
             boolean foundDigit = false;
             for (int i = preFormat.length() - 1; i >= 0; i--) {
@@ -321,15 +338,17 @@ public class MotoModelsMapper {
                     if (!foundDigit) continue;
                 }
                 if (Character.isDigit(c) || c == '.') {
-                    result = c + result;
+//                    result = c + result;
+                    resultSB.insert(0,c);
                 } else break;
             }
         } else if (preFormat.length() == 1) {
             if (Character.isDigit(preFormat.charAt(0))) {
-                result = preFormat;
+//                result = preFormat;
+                resultSB.append(preFormat);
             }
         }
-        return result;
+        return resultSB.toString();
     }
 
     private String formatYear(String year) {
