@@ -1,1 +1,1 @@
-insert into moto_models(make,model,year,end_year,engine,capacity,power,clutch,torque,abs,transmission,final_drive,seat_height,dry_weight,wet_weight,fuel_capacity,reserve,consumption,cooling_system,top_speed,url,image) values(
+insert into moto_models(make,model,start_year,end_year,engine,capacity,power,clutch,torque,abs,transmission,final_drive,seat_height,dry_weight,wet_weight,fuel_capacity,reserve,consumption,cooling_system,top_speed,url,image) values('%s','%s',%s,%s,'%s',%s,%s,'%s',%s,%s,%s,'%s',%s,%s,%s,%s,%s,%s,'%s',%s,'%s','%s')

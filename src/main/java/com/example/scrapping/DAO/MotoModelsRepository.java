@@ -18,38 +18,19 @@ public class MotoModelsRepository {
 
     // Create
     public int insertMoto(MotoModelDTO motoModelDTO) {
-        String sql = getSqlText(Constants.INSERT_MOTO_SCRIPT);
-//        System.out.println(sql); // to be deleted
+        String sql =  String.format( getSqlText(Constants.INSERT_MOTO_SCRIPT), motoModelDTO.getMake() , motoModelDTO.getModel(), motoModelDTO.getStartYear(),
+                motoModelDTO.getEndYear(), motoModelDTO.getEngine(), motoModelDTO.getCapacity(), motoModelDTO.getPower(),
+                motoModelDTO.getClutch(), motoModelDTO.getTorque(), motoModelDTO.isAbs(), motoModelDTO.getTransmission(),
+                motoModelDTO.getFinalDrive(), motoModelDTO.getSeatHeight(), motoModelDTO.getDryWeight(), motoModelDTO.getWetWeight(),
+                motoModelDTO.getFuelCapacity(), motoModelDTO.getReserve(), motoModelDTO.getConsumption(), motoModelDTO.getCoolingSystem(),
+                motoModelDTO.getTopSpeed(), motoModelDTO.getUrl(), motoModelDTO.getImage());
 
-        return jdbcTemplate.update(sql +
-                "'" + motoModelDTO.getMake() + "'," +
-                "'" + motoModelDTO.getModel() + "'," +
-                motoModelDTO.getYear() + "," +
-                motoModelDTO.getEndYear() + "," +
-                "'" + motoModelDTO.getEngine() + "'," +
-                motoModelDTO.getCapacity() + "," +
-                motoModelDTO.getPower() + "," +
-                "'" + motoModelDTO.getClutch() + "'," +
-                motoModelDTO.getTorque() + "," +
-                motoModelDTO.isAbs() + "," +
-                motoModelDTO.getTransmission() + "," +
-                "'" + motoModelDTO.getFinalDrive() + "'," +
-                motoModelDTO.getSeatHeight() + "," +
-                motoModelDTO.getDryWeight() + "," +
-                motoModelDTO.getWetWeight() + "," +
-                motoModelDTO.getFuelCapacity() + "," +
-                motoModelDTO.getReserve() + "," +
-                motoModelDTO.getConsumption() + "," +
-                "'" + motoModelDTO.getCoolingSystem() + "'," +
-                motoModelDTO.getTopSpeed() + "," +
-                "'" + motoModelDTO.getUrl() + "'," +
-                "'" + motoModelDTO.getImage() + "')");
+        return jdbcTemplate.update(sql);
     }
 
-    // Read
-
     public int queryCountByUrl(String url) {
-        String sql = getSqlText(Constants.COUNT_MOTO_BY_URL) + "'" + url + "';";
+        String sql = String.format(getSqlText(Constants.COUNT_MOTO_BY_URL), url);
+//        String sql = getSqlText(Constants.COUNT_MOTO_BY_URL) + "'" + url + "';";
         int motoModelCount = 0;
         try {
             motoModelCount = jdbcTemplate.queryForObject(sql, Integer.class);

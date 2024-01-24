@@ -33,27 +33,26 @@ public class ModelDetailsService {
     private final List<String> listOfSpecValue;
     private String imageLink = "";
     private String imageFile = "";
-    private LogsWriterSingletonService logsWriterSingletonService = LogsWriterSingletonService.getInstance();
+    private final LogsWriterSingletonService logsWriterSingletonService = LogsWriterSingletonService.getInstance();
+    private final WebClient client = new WebClient();
+    private final MotoModelsMapper motoModelsMapper = new MotoModelsMapper();
 
     public ModelDetailsService() {
         this.listOfSpecName = new ArrayList<>();
         this.listOfSpecValue = new ArrayList<>();
+        client.getOptions().setCssEnabled(false);
+        client.getOptions().setJavaScriptEnabled(false);
     }
 
     public void getModelDetails(Manufacturer manufacturer) throws IOException {
-        WebClient client = new WebClient();
-        client.getOptions().setCssEnabled(false);
-        client.getOptions().setJavaScriptEnabled(false);
         int modelsCounter = 1;
         int nrOfModels = manufacturer.getModelsList().size();
 
         for (ModelOfManuf modelOfManuf : manufacturer.getModelsList()) {
-            System.out.println(modelsCounter + "/" + nrOfModels + ": " + modelOfManuf.getName() +
-                    " (" + modelOfManuf.getProductionYears() + ") " +
-                    modelOfManuf.getUrl());
+            printModelBeingScrapped(modelsCounter,nrOfModels,modelOfManuf);
             modelsCounter++;
-            HtmlPage page;
 
+            HtmlPage page;
             try {
                 page = client.getPage(modelOfManuf.getUrl());
             } catch (FailingHttpStatusCodeException e) {
@@ -74,18 +73,16 @@ public class ModelDetailsService {
 
             printScrapedTable(); // to be deleted
 
-            MotoModelsMapper motoModelsMapper = new MotoModelsMapper();
-            MotoModelDTO motoModelDTO = new MotoModelDTO();
-
+            MotoModelDTO motoModelDTO;
             try {
                 motoModelDTO = motoModelsMapper.mapMotoModel(listOfSpecName, listOfSpecValue, manufacturer, modelOfManuf, imageFile);
             } catch (Exception e) {
                 logErrorInGetModel(manufacturer, modelOfManuf, "Error mapping model: page=", e);
                 continue;
             }
-            System.out.println(motoModelDTO); // to be deleted
+//            System.out.println(motoModelDTO); // to be deleted
 
-            if (!motoModelsMapper.hasErrors && !motoModelDTO.getModel().isEmpty()) {
+            if (!motoModelsMapper.isErroneous() && !motoModelDTO.getModel().isEmpty()) {
                 boolean wasInserted = false;
                 String manufModelURL = manufacturer.getUrl() + " " + modelOfManuf.getName() + " " + modelOfManuf.getProductionYears() + " " + modelOfManuf.getUrl();
                 try {
@@ -103,11 +100,28 @@ public class ModelDetailsService {
 //        listOfSpecName.forEach(System.out::println); // to be deleted
     }
 
+    private void printModelBeingScrapped(int modelsCounter, int nrOfModels, ModelOfManuf modelOfManuf) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(modelsCounter).append("/").append(nrOfModels).append(": ")
+                        .append(modelOfManuf.getName())
+                        .append(" (").append(modelOfManuf.getProductionYears()).append(") ")
+                        .append(modelOfManuf.getUrl());
+        System.out.println(sb);
+    }
+
     private void logErrorInGetModel(Manufacturer manufacturer, ModelOfManuf model, String errorText, Exception e) throws IOException {
-        String error = errorText + " " + model.getPage() + ". " + manufacturer.getName() + " " +
-                model.getName() + " " + model.getProductionYears() + " " + model.getUrl() + " " + e;
-        logsWriterSingletonService.logError(error);
-        System.out.println(error);
+        StringBuilder sbError = new StringBuilder();
+        sbError.append(errorText).append(" ")
+                .append(model.getPage()).append(". ")
+                .append(manufacturer.getName()).append(" ")
+                .append(model.getName()).append(" ")
+                .append(model.getProductionYears()).append(" ")
+                .append(model.getUrl()).append(" ")
+                .append(e);
+//        String error = errorText + " " + model.getPage() + ". " + manufacturer.getName() + " " +
+//                model.getName() + " " + model.getProductionYears() + " " + model.getUrl() + " " + e;
+        logsWriterSingletonService.logError(sbError.toString());
+        System.out.println(sbError);
         clearData();
     }
 
@@ -149,7 +163,7 @@ public class ModelDetailsService {
             if (wordOfModelName.length() > 2 && imageJPG.toLowerCase().contains(wordOfModelName.toLowerCase())) ;
             {
                 imageFile = formattedImgLink.substring(formattedImgLink.lastIndexOf("/") + 1);
-                System.out.println("formattedImgLink: " + formattedImgLink); // to be deleted
+//                System.out.println("formattedImgLink: " + formattedImgLink); // to be deleted
                 return true;
             }
         }
@@ -178,7 +192,7 @@ public class ModelDetailsService {
             File filesPath = new File(picturesPathBase);
             List<String> images = Arrays.asList(Objects.requireNonNull(filesPath.list()));
             if (images.contains(imageFile)) {
-//                System.out.println("Image exists!");  // to be deleted
+                System.out.println("Image exists!");  // to be deleted
                 return;
             }
         }

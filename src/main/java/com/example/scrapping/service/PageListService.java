@@ -36,17 +36,29 @@ public class PageListService {
     // START HERE
     public void startScrapping() {
         try {
+
+//            scrapeOneModelByUrl("AJP","PR3 200 Enduro Pro, Supermoto","https://www.motorcyclespecs.co.za/model/AJP/AJP%20PR3%20200%20Enduro%20Pro%2014.htm","2009-14");
 //            modelsToDataBaseService.existsInDB("test");
+
             listOfManufacturers = getListOfManufacturers();
             for (Manufacturer manufacturer : listOfManufacturers) {
                 getModelsOfManuf(manufacturer);
-                getModelsDetailsAndAddToDB(manufacturer); // no need for now
+                getModelsDetailsAndAddToDB(manufacturer);
 //                logInsertedMotos(newManuf);
             }
         } catch (Exception e) {
             log.error("Something is wrong: " + e);
         }
 
+    }
+
+    private void scrapeOneModelByUrl(String manufName, String modelName, String url, String productionYears){
+        Manufacturer manuf = new Manufacturer(manufName,"ScrapingOne");
+        ModelOfManuf model = new ModelOfManuf(modelName,url,productionYears,1);
+        if (!modelsToDataBaseService.existsInDB(url)) {
+            manuf.addModel(model);
+            getModelsDetailsAndAddToDB(manuf);
+        }
     }
 
     private void logInsertedMotos(Manufacturer manufacturer) {
@@ -96,13 +108,12 @@ public class PageListService {
         boolean canScrapPage = true;
         int pageCounter = 1;
         while (canScrapPage) {
-            System.out.println("--------------------- Page: " + pageCounter + " ---------------------"); // to be deleted
+//            System.out.println("--------------------- Page: " + pageCounter + " ---------------------"); // to be deleted
             pageCounter++;
-            int modelPerPageCounter = 1;
+//            int modelPerPageCounter = 1;
             List<HtmlElement> items = page.getByXPath("//tr");
             for (int i = 0; i < items.size(); i++) {
                 HtmlElement item = items.get(i);
-//                    if(pageCounter!=9) continue; // to be deleted
                 HtmlElement anchor = item.getFirstByXPath(".//font/a");
 
                 if (anchor == null) anchor = item.getFirstByXPath(".//p/a");
@@ -113,7 +124,7 @@ public class PageListService {
                     String modelName = anchor.getTextContent();
                     modelName = modelName.replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "").replaceAll(" ", "").trim();
                     if (modelName.isEmpty()) continue;
-                    if (listOfLinksToIgnore.contains(modelName)) continue;
+//                    if (listOfLinksToIgnore.contains(modelName)) continue; // TODO remove
 
                     String productionYears = "";
                     String semiLink = anchor.getAttribute("href");
@@ -139,9 +150,9 @@ public class PageListService {
                     ModelOfManuf modelOfManuf = new ModelOfManuf(modelName, url, productionYears, pageCounter);
                     manufacturer.addModel(modelOfManuf);
 
-                    if (modelOfManuf.getUrl().isEmpty()) continue;
-                    System.out.println(modelPerPageCounter + ". " + modelOfManuf); // to be deleted
-                    modelPerPageCounter++; // to be deleted
+//                    if (modelOfManuf.getUrl().isEmpty()) continue;
+//                    System.out.println(modelPerPageCounter + ". " + modelOfManuf); // to be deleted
+//                    modelPerPageCounter++; // to be deleted
                 }
             }
             canScrapPage = !nextButtonUrl.isEmpty();

@@ -4,7 +4,7 @@ CREATE TABLE `moto_models` (
   `id` int NOT NULL AUTO_INCREMENT,
   `make` varchar(100) NOT NULL,
   `model` varchar(100) NOT NULL,
-  `year` int NOT NULL,
+  `start_year` int NOT NULL,
   `end_year` int NOT NULL,
   `engine` varchar(500),
   `capacity` double NOT NULL,

@@ -12,7 +12,7 @@ public class MotoModelDTO {
     private int id;
     private String make;
     private String model;
-    private int year;
+    private int startYear;
     private int endYear;
     private String engine;
     private double capacity;   // cc
