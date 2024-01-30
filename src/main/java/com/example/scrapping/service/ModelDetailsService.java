@@ -34,8 +34,11 @@ public class ModelDetailsService {
     private String imageLink = "";
     private String imageFile = "";
     private final LogsWriterSingletonService logsWriterSingletonService = LogsWriterSingletonService.getInstance();
-    private final WebClient client = new WebClient();
+    private WebClient client = new WebClient();
     private final MotoModelsMapper motoModelsMapper = new MotoModelsMapper();
+    private HtmlElement table24;
+    private HtmlPage page;
+    private MotoModelDTO motoModelDTO;
 
     public ModelDetailsService() {
         this.listOfSpecName = new ArrayList<>();
@@ -52,7 +55,6 @@ public class ModelDetailsService {
             printModelBeingScrapped(modelsCounter,nrOfModels,modelOfManuf);
             modelsCounter++;
 
-            HtmlPage page;
             try {
                 page = client.getPage(modelOfManuf.getUrl());
             } catch (FailingHttpStatusCodeException e) {
@@ -60,7 +62,6 @@ public class ModelDetailsService {
                 continue;
             }
 
-            HtmlElement table24;
             try {
                 table24 = page.getHtmlElementById("table24");
             } catch (Exception e) {
@@ -73,7 +74,6 @@ public class ModelDetailsService {
 
             printScrapedTable(); // to be deleted
 
-            MotoModelDTO motoModelDTO;
             try {
                 motoModelDTO = motoModelsMapper.mapMotoModel(listOfSpecName, listOfSpecValue, manufacturer, modelOfManuf, imageFile);
             } catch (Exception e) {
@@ -84,13 +84,22 @@ public class ModelDetailsService {
 
             if (!motoModelsMapper.isErroneous() && !motoModelDTO.getModel().isEmpty()) {
                 boolean wasInserted = false;
-                String manufModelURL = manufacturer.getUrl() + " " + modelOfManuf.getName() + " " + modelOfManuf.getProductionYears() + " " + modelOfManuf.getUrl();
+                StringBuilder manufModelURLSB = new StringBuilder();
+                manufModelURLSB.append(manufacturer.getUrl()).append(" ")
+                        .append(modelOfManuf.getName()).append(" ")
+                        .append(modelOfManuf.getProductionYears()).append(" ")
+                        .append(modelOfManuf.getUrl());
+//                String manufModelURL = manufacturer.getUrl() + " " + modelOfManuf.getName() + " " + modelOfManuf.getProductionYears() + " " + modelOfManuf.getUrl();
                 try {
                     wasInserted = modelsToDataBaseService.insertMoto(motoModelDTO) == 1;
                 } catch (Exception e) {
-                    String error = "Error inserting in DB for " + manufModelURL + " " + e;
-                    logsWriterSingletonService.logError(error);
-                    System.out.println(error);
+                    StringBuilder errorSB = new StringBuilder();
+                    errorSB.append("Error inserting in DB for ")
+                            .append(manufModelURLSB)
+                            .append(e);
+//                    String error = "Error inserting in DB for " + manufModelURL + " " + e;
+                    logsWriterSingletonService.logError(errorSB.toString());
+                    System.out.println(errorSB);
                 }
                 System.out.println((wasInserted ? "Inserted " : "Not inserted "));
                 modelOfManuf.setInserted(wasInserted);
@@ -109,7 +118,7 @@ public class ModelDetailsService {
         System.out.println(sb);
     }
 
-    private void logErrorInGetModel(Manufacturer manufacturer, ModelOfManuf model, String errorText, Exception e) throws IOException {
+    private void logErrorInGetModel(Manufacturer manufacturer, ModelOfManuf model, String errorText, Exception e) {
         StringBuilder sbError = new StringBuilder();
         sbError.append(errorText).append(" ")
                 .append(model.getPage()).append(". ")
@@ -130,6 +139,12 @@ public class ModelDetailsService {
         listOfSpecValue.clear();
         imageLink = "";
         imageFile = "";
+        table24 = null;
+        page = null;
+        client = new WebClient();
+        client.getOptions().setCssEnabled(false);
+        client.getOptions().setJavaScriptEnabled(false);
+        motoModelDTO = null;
     }
 
     private void getImageOfTheModel(HtmlElement table24, String manufacturer, String modelName) {

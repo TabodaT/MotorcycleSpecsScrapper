@@ -80,7 +80,7 @@ public class PageListService {
                     .append("\n}");
             try {
                 logsWriterSingletonService.logInsertedMotos(sb.toString());
-            } catch (IOException e) {
+            } catch (Exception e) {
                 System.out.println(e);
             }
         }

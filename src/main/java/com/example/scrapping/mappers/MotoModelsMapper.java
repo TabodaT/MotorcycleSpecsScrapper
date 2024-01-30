@@ -143,7 +143,7 @@ public class MotoModelsMapper {
         log.error(errorStringSB.toString());
         try {
             logsWriterSingletonService.logError(errorStringSB.insert(0,": ").insert(0, getNow).toString());
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println(e);
         }
     }

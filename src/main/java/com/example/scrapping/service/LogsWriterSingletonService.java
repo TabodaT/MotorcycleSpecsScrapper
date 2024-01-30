@@ -18,32 +18,22 @@ public class LogsWriterSingletonService {
         return instance;
     }
 
-    public void logError(String error) throws IOException {
+    public void logError(String error) {
         addToLog(error, Constants.ERRORS_LOG_TXT_FILE);
     }
 
-    public void logInsertedMotos(String motos) throws IOException {
+    public void logInsertedMotos(String motos)  {
         addToLog(motos, Constants.INSERTED_MODELS_JSON_LOG_FILE);
     }
 
-    private void addToLog(String errors, String file) throws IOException {
-        FileWriter fw = null;
-        BufferedWriter bw = null;
-        PrintWriter pw = null;
-        try {
-            fw = new FileWriter(file, true);
-            bw = new BufferedWriter(fw);
-            pw = new PrintWriter(bw);
+    private void addToLog(String errors, String file) {
+        try(FileWriter fw = new FileWriter(file, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter pw = new PrintWriter(bw)) {
             pw.println(errors);
             pw.flush();
-        } finally {
-            try {
-                pw.close();
-                bw.close();
-                fw.close();
-            } catch (IOException io) {
-                System.out.println(io);
-            }
+        }  catch (Exception e){
+            System.out.println(e);
         }
     }
 }
