@@ -38,15 +38,16 @@ public class PageListService {
     public void startScrapping() {
         try {
 
-//            scrapeOneModelByUrl("BMW","F 750GS ","https://www.motorcyclespecs.co.za/model/bmw/bmw-f750gs-20.html","2020");
+            scrapeOneModelByUrl("Benelli","TRK 800",
+                    "https://www.motorcyclespecs.co.za/model/beneli/benelli_trk_800_22.html","2022");
 //            modelsToDataBaseService.existsInDB("test");
 
-            listOfManufacturers = getListOfManufacturers();
-            for (Manufacturer manufacturer : listOfManufacturers) {
-                getModelsOfManuf(manufacturer);
-                getModelsDetailsAndAddToDB(manufacturer);
-//                logInsertedMotos(newManuf);
-            }
+//            listOfManufacturers = getListOfManufacturers();
+//            for (Manufacturer manufacturer : listOfManufacturers) {
+//                getModelsOfManuf(manufacturer);
+//                getModelsDetailsAndAddToDB(manufacturer);
+////                logInsertedMotos(newManuf);
+//            }
         } catch (Exception e) {
             log.error("Something is wrong: " + e);
         }
@@ -208,7 +209,7 @@ public class PageListService {
 
             String manufName = element.getTextContent();
             if (manufName.isBlank() || manufName.contains("Complete Manufacturer") ||
-                    ignoreManufacturersList.contains(manufName)) continue;
+                    ignoreManufacturersList.contains(manufName)) continue; // to be deleted TODO
 
             Manufacturer manufacturer = new Manufacturer(manufName, composeUrlOfManuf(semiLink));
             resultListOfManufacturers.add(manufacturer);

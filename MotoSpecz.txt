@@ -75,7 +75,8 @@ v	- fix memory leak and test
 v	- use StringBuilder over String for concatenation
 v	- use Try-With-Resources (AutoCloseable) for handling files
 v	- fix mapping cooling
-	- fix logic of adding motorcycles with no year
+v	- fix logic of adding motorcycles with no year
+	- make seat height double
 	- fix moto with year > 9999
 	- fix mapping torque
 	- create a map to ignore when marking erroneous

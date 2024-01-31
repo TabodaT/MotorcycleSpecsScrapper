@@ -48,11 +48,14 @@ public class MotoModelsMapper {
         motoModelDTO.setModel(modelOfManuf.getName());
         //   year
         motoModelDTO.setStartYear(Integer.parseInt(getSpecValue("year")));
-        motoModelDTO.setEndYear(Integer.parseInt(this.endYear));
-        if (containsSpec && motoModelDTO.getStartYear() == 0)
-            log.error("year " + modelName + " is missing spec" + " " + modelOfManuf.getUrl()); // to be deleted
+        if (motoModelDTO.getStartYear() == 0) {
+            motoModelDTO.setStartYear(Integer.parseInt(formatYear(modelOfManuf.getProductionYears())));
+        }
         //   end_year
         motoModelDTO.setEndYear(Integer.parseInt(endYear));
+        if (motoModelDTO.getStartYear() == 0 || motoModelDTO.getEndYear() == 0) {
+            logError("year");
+        }
         //   url
         motoModelDTO.setUrl(modelOfManuf.getUrl());
         //   image
@@ -90,7 +93,7 @@ public class MotoModelsMapper {
             if (containsSpec && motoModelDTO.getFinalDrive().equals("0"))
                 logError("drive");
             //   seat_height
-            motoModelDTO.setSeatHeight(Integer.parseInt(getSpecValue("seat")));
+            motoModelDTO.setSeatHeight(Double.parseDouble(getSpecValue("seat")));
             if (containsSpec && motoModelDTO.getSeatHeight() == 0)
                 logError("seat");
             //   dry_weight
@@ -143,7 +146,7 @@ public class MotoModelsMapper {
                 .append(modelOfManuf.getUrl());
         log.error(errorStringSB.toString());
         try {
-            logsWriterSingletonService.logError(errorStringSB.insert(0,": ").insert(0, getNow).toString());
+            logsWriterSingletonService.logError(errorStringSB.insert(0, ": ").insert(0, getNow).toString());
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -201,13 +204,15 @@ public class MotoModelsMapper {
                     break;
                 }
                 if (specName.equals("engine")) {
-                    containsSpec = true;
                     result = valueOfSpecAtI;
                     break;
                 }
                 if (specName.equals("cooling")) {
-                    containsSpec = true;
                     result = valueOfSpecAtI;
+                    break;
+                }
+                if (nameOfSpecAtI.equals("dry") || nameOfSpecAtI.equals("wet")) {
+                    result = formatMetricUnit(valueOfSpecAtI, "kg");
                     break;
                 }
             } else if (nameOfSpecAtI.contains(specName)) {                   // CONTAINS
@@ -284,7 +289,7 @@ public class MotoModelsMapper {
         return result;
     }
 
-    private void resetMapper(){
+    private void resetMapper() {
         this.listOfSpecName.clear();
         this.listOfSpecValue.clear();
         this.manufacturer = null;
@@ -320,10 +325,10 @@ public class MotoModelsMapper {
         return result;
     }
 
-    private String formatMetricUnit(String rawSpecValue, String kwOrNmOrLitre) {
+    private String formatMetricUnit(String rawSpecValue, String unit) {
         String result = "";
-        if (rawSpecValue.toLowerCase().contains(kwOrNmOrLitre)) {
-            String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf(kwOrNmOrLitre)).trim().replaceAll(" ", "");
+        if (rawSpecValue.toLowerCase().contains(unit)) {
+            String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf(unit)).trim().replaceAll(" ", "");
             result = getNumberFromEndOfString(preFormat);
         }
         return result.isEmpty() ? "0" : result;
@@ -344,7 +349,7 @@ public class MotoModelsMapper {
                 }
                 if (Character.isDigit(c) || c == '.') {
 //                    result = c + result;
-                    resultSB.insert(0,c);
+                    resultSB.insert(0, c);
                 } else break;
             }
         } else if (preFormat.length() == 1) {

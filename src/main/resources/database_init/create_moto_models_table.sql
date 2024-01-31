@@ -14,7 +14,7 @@ CREATE TABLE `moto_models` (
   `abs` BOOLEAN,
   `transmission` int,
   `final_drive` varchar(100),
-  `seat_height` int,
+  `seat_height` double,
   `dry_weight` double,
   `wet_weight` double,
   `fuel_capacity` double,

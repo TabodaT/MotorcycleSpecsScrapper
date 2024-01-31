@@ -22,7 +22,7 @@ public class MotoModelDTO {
     private boolean abs;
     private int transmission;   // speed
     private String finalDrive;
-    private int seatHeight; // mm
+    private double seatHeight; // mm
     private double dryWeight;  // kg
     private double wetWeight;  // kg
     private double fuelCapacity; // Litres

@@ -39,6 +39,11 @@ public class ModelDetailsService {
     private HtmlPage page;
     private MotoModelDTO motoModelDTO;
 
+    private List<String> ignoreURLs = new ArrayList<>(Arrays.asList(
+            "https://www.motorcyclespecs.co.za/model/Arial/ariel_square_four.htm",
+            "https://www.motorcyclespecs.co.za/model/Baiai/Bajaj%20Classic%20125.htm",
+            "https://www.motorcyclespecs.co.za/model/Baiai/Bajaj%20Discover%20100M%2014.htm"));
+
     public ModelDetailsService() {
         this.listOfSpecName = new ArrayList<>();
         this.listOfSpecValue = new ArrayList<>();
@@ -49,6 +54,7 @@ public class ModelDetailsService {
         int nrOfModels = manufacturer.getModelsList().size();
 
         for (ModelOfManuf modelOfManuf : manufacturer.getModelsList()) {
+            if (ignoreURLs.contains(modelOfManuf.getUrl())) continue; // to be deleted todo
             printModelBeingScrapped(modelsCounter,nrOfModels,modelOfManuf);
             modelsCounter++;
 
