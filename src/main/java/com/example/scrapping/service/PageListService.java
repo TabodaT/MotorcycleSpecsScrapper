@@ -203,6 +203,7 @@ public class PageListService {
             Manufacturer manufacturer = new Manufacturer(manufName, composeUrlOfManuf(semiLink));
             resultListOfManufacturers.add(manufacturer);
         }
+        client.close();
         return resultListOfManufacturers;
     }
 

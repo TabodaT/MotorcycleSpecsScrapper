@@ -141,6 +141,7 @@ public class ModelDetailsService {
         imageFile = "";
         table24 = null;
         page = null;
+        client.close();
         client = new WebClient();
         client.getOptions().setCssEnabled(false);
         client.getOptions().setJavaScriptEnabled(false);

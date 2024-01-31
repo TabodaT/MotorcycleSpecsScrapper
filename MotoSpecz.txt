@@ -1,0 +1,91 @@
+All values are metric! kg/km/kw
+
+to do:
+v	- synthetize the specs I need
+v	- write a program that rearanges alphabetically text from files
+v	- insert first test moto
+v	- create DTO
+v	- create a pictures folder
+v	- fix saving images to correct folder (ModelDetailsService:86)
+v	- test images download with other manufacturers, also containing 2 words
+v		- fix for Brough Superior (PageListService:207)
+v	- don't download if image exists
+v	- add image.jpg to db
+v	- change data type for Capacity to int
+v	- change data type for dry weight to int	
+v	- change data type for wet weight to int	
+v	- change data type for seat to int	
+v	- change data type for fuel cap to int	
+v	- change data type for top speed to int	
+v	- change data type for power to int	
+v	- eliminate: ignition, 
+v	oil_capacity, 
+v	power_to_weight_ratio, 
+v	range, 
+v	front brakes, 
+v	back brakes
+v	- change data type for Consumption to double	
+v	- change lenght of Engine to 500
+v	- change lenght of the rest of the entities to 100
+v	- remove front brakes and read brakes from table
+v	- change torque to int
+v	- update all changes in DB
+v	- get year from models table
+v	- process end_year and year
+v	- add end_year in table: int
+v	- update all changes in DB
+v	- set fuel capacity to double
+v	- change transmission to int
+v	- map scrapped data to dto
+v	- write functions to match scrapped rows to db rows
+v	- write function to clean data to be inserted in db
+v	- insert first 5 motorcycles in db trough scrapping
+v	- create a singleton that writes inside a txt file all errors
+v	- create error for mapping method to throw and show model and url
+v	- CREATE
+v		- insert first motoModelDTO to DB
+v	- READ
+v		- get by url (for checking if moto model was inserted)
+x		- get by manufacturer, model, year
+x	- UPDATE
+x		- update if field is int
+x		- update if field is double
+x		- update if field is String
+x		- update if field is boolean
+x	- DELETE
+x		- delete using url
+v	- don't insert new models if there are errors
+v	- before adding manufacturer to listOfManufacturers check if there's an url
+v	- scrape models per manufacturer; don't populate all models from all manufacturers, then scrape
+v	- make double: power, torque, reserve, dry, wet weight, capacity, topspeed
+v	- update BD
+v	- create a log of format JSON that takes all the models that were inserted
+v	- log error for 404 not foung model page
+v	- fix adding end year
+v	- create a list of manuf to ignore
+v	- create exception for adding motos that have errors transmission:(https://www.motorcyclespecs.co.za/model/AJS/AJS%20R7%20Track%20Racer.htm)
+v		- set transmission to 1 to all of these
+v	- improve url creation for all 404s
+v	- add page to spec error
+v	- implement a function to scrape only 1 page
+v	- update year to start year
+v	- insert to placeholder for db queries https://stackoverflow.com/questions/17364632/java-generating-strings-with-placeholders
+	- find memory leak
+	- create a map to ignore when marking erroneous
+	- use StringBuilder over String for concatenation
+	- use Try-With-Resources (AutoCloseable) for handling files
+	- fix mapping cooling
+	- fix mapping torque
+	- adapt ModelDetailsService.getModelDetails to look inside other tables because "table24" does not apply everywhere
+	- delete list of manuf to ignore
+
+Maybe also:
+	- change location of mysql DB: https://stackoverflow.com/questions/1795176/how-to-change-mysql-data-directory
+	
+	
+Scrapped (0)	Inserted in db (1):
+0	1
+v	v	- AJP
+v	v	- AJS
+		- Aprilia
+v		- Brough Superior
