@@ -70,12 +70,15 @@ v	- add page to spec error
 v	- implement a function to scrape only 1 page
 v	- update year to start year
 v	- insert to placeholder for db queries https://stackoverflow.com/questions/17364632/java-generating-strings-with-placeholders
-	- find memory leak
-	- create a map to ignore when marking erroneous
-	- use StringBuilder over String for concatenation
-	- use Try-With-Resources (AutoCloseable) for handling files
-	- fix mapping cooling
+v	- find memory leak
+v	- fix memory leak and test
+v	- use StringBuilder over String for concatenation
+v	- use Try-With-Resources (AutoCloseable) for handling files
+v	- fix mapping cooling
+	- fix logic of adding motorcycles with no year
+	- fix moto with year > 9999
 	- fix mapping torque
+	- create a map to ignore when marking erroneous
 	- adapt ModelDetailsService.getModelDetails to look inside other tables because "table24" does not apply everywhere
 	- delete list of manuf to ignore
 

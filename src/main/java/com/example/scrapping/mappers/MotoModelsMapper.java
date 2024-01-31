@@ -37,6 +37,7 @@ public class MotoModelsMapper {
         this.manufacturer = manufacturer;
         this.modelOfManuf = modelOfManuf;
         this.modelProductionYears = modelOfManuf.getProductionYears();
+        this.erroneous = false;
 
         MotoModelDTO motoModelDTO = new MotoModelDTO();
         String modelName = modelOfManuf.getName();
@@ -204,6 +205,11 @@ public class MotoModelsMapper {
                     result = valueOfSpecAtI;
                     break;
                 }
+                if (specName.equals("cooling")) {
+                    containsSpec = true;
+                    result = valueOfSpecAtI;
+                    break;
+                }
             } else if (nameOfSpecAtI.contains(specName)) {                   // CONTAINS
                 if (nameOfSpecAtI.contains("power") && !nameOfSpecAtI.contains("weight")) {
                     containsSpec = true;
@@ -286,7 +292,6 @@ public class MotoModelsMapper {
         this.endYear = "0";
         this.containsSpec = false;
         this.modelOfManuf = null;
-        this.erroneous = false;
     }
 
     private String getConsumption(String rawSpecValue) {

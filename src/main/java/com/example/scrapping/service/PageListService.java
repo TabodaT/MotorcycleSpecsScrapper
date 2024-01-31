@@ -3,6 +3,7 @@ package com.example.scrapping.service;
 import com.example.scrapping.Constants.Constants;
 import com.example.scrapping.dto.Manufacturer;
 import com.example.scrapping.dto.ModelOfManuf;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
@@ -37,7 +38,7 @@ public class PageListService {
     public void startScrapping() {
         try {
 
-//            scrapeOneModelByUrl("AJP","PR3 200 Enduro Pro, Supermoto","https://www.motorcyclespecs.co.za/model/AJP/AJP%20PR3%20200%20Enduro%20Pro%2014.htm","2009-14");
+//            scrapeOneModelByUrl("BMW","F 750GS ","https://www.motorcyclespecs.co.za/model/bmw/bmw-f750gs-20.html","2020");
 //            modelsToDataBaseService.existsInDB("test");
 
             listOfManufacturers = getListOfManufacturers();
@@ -180,10 +181,19 @@ public class PageListService {
 
     private List<Manufacturer> getListOfManufacturers() throws IOException {
         List<Manufacturer> resultListOfManufacturers = new ArrayList<>();
-        WebClient client = new WebClient();
-        client.getOptions().setCssEnabled(false);
-        client.getOptions().setJavaScriptEnabled(false);
-        HtmlPage page = client.getPage(Constants.MOTORCYCLESPECS_CO_ZA);
+//        WebClient client = new WebClient();
+//        client.getOptions().setCssEnabled(false);
+//        client.getOptions().setJavaScriptEnabled(false);
+        HtmlPage page;
+
+        try(WebClient client = new WebClient()) {
+            client.getOptions().setCssEnabled(false);
+            client.getOptions().setJavaScriptEnabled(false);
+            page = client.getPage(Constants.MOTORCYCLESPECS_CO_ZA);
+        } catch (FailingHttpStatusCodeException e) {
+            log.error(String.valueOf(e));
+            return null;
+        }
         HtmlElement theDivWithManuf = page.getFirstByXPath("//div[@class='subMenu']");
 
         Iterable<DomElement> linksOfManuf = theDivWithManuf.getChildElements();
@@ -203,7 +213,6 @@ public class PageListService {
             Manufacturer manufacturer = new Manufacturer(manufName, composeUrlOfManuf(semiLink));
             resultListOfManufacturers.add(manufacturer);
         }
-        client.close();
         return resultListOfManufacturers;
     }
 

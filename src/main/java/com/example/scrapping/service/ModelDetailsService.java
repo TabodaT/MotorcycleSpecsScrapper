@@ -34,7 +34,6 @@ public class ModelDetailsService {
     private String imageLink = "";
     private String imageFile = "";
     private final LogsWriterSingletonService logsWriterSingletonService = LogsWriterSingletonService.getInstance();
-    private WebClient client = new WebClient();
     private final MotoModelsMapper motoModelsMapper = new MotoModelsMapper();
     private HtmlElement table24;
     private HtmlPage page;
@@ -43,8 +42,6 @@ public class ModelDetailsService {
     public ModelDetailsService() {
         this.listOfSpecName = new ArrayList<>();
         this.listOfSpecValue = new ArrayList<>();
-        client.getOptions().setCssEnabled(false);
-        client.getOptions().setJavaScriptEnabled(false);
     }
 
     public void getModelDetails(Manufacturer manufacturer) throws IOException {
@@ -55,7 +52,9 @@ public class ModelDetailsService {
             printModelBeingScrapped(modelsCounter,nrOfModels,modelOfManuf);
             modelsCounter++;
 
-            try {
+            try(WebClient client = new WebClient()) {
+                client.getOptions().setCssEnabled(false);
+                client.getOptions().setJavaScriptEnabled(false);
                 page = client.getPage(modelOfManuf.getUrl());
             } catch (FailingHttpStatusCodeException e) {
                 logErrorInGetModel(manufacturer, modelOfManuf, "404 model page not found: page=", e);
@@ -141,10 +140,6 @@ public class ModelDetailsService {
         imageFile = "";
         table24 = null;
         page = null;
-        client.close();
-        client = new WebClient();
-        client.getOptions().setCssEnabled(false);
-        client.getOptions().setJavaScriptEnabled(false);
         motoModelDTO = null;
     }
 
