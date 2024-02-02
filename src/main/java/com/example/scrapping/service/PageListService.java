@@ -38,16 +38,17 @@ public class PageListService {
     public void startScrapping() {
         try {
 
-            scrapeOneModelByUrl("Benelli","TRK 800",
-                    "https://www.motorcyclespecs.co.za/model/beneli/benelli_trk_800_22.html","2022");
+//            scrapeOneModelByUrl("Benelli","TRK 800",
+//                    "https://www.motorcyclespecs.co.za/model/beneli/benelli_trk_800_22.html","2022");
+
 //            modelsToDataBaseService.existsInDB("test");
 
-//            listOfManufacturers = getListOfManufacturers();
-//            for (Manufacturer manufacturer : listOfManufacturers) {
-//                getModelsOfManuf(manufacturer);
-//                getModelsDetailsAndAddToDB(manufacturer);
-////                logInsertedMotos(newManuf);
-//            }
+            listOfManufacturers = getListOfManufacturers();
+            for (Manufacturer manufacturer : listOfManufacturers) {
+                getModelsOfManuf(manufacturer);
+                getModelsDetailsAndAddToDB(manufacturer);
+                logNotInsertedMotos(manufacturer);
+            }
         } catch (Exception e) {
             log.error("Something is wrong: " + e);
         }
@@ -63,13 +64,13 @@ public class PageListService {
         }
     }
 
-    private void logInsertedMotos(Manufacturer manufacturer) {
+    private void logNotInsertedMotos(Manufacturer manufacturer) {
         StringBuilder sbModels = new StringBuilder();
         for (ModelOfManuf model : manufacturer.getModelsList()) {
-            if (model.isInserted()) {
-                sbModels.append("\"").append(manufacturer.getName()).append(" ")
+            if (!model.isInserted() && !modelDetailsService.getIgnoreURLs().contains(model.getUrl())) {
+                sbModels.append("\n").append("\"").append(manufacturer.getName()).append(" ")
                         .append(model.getName()).append(" ")
-                        .append(model.getUrl()).append("\"\n");
+                        .append(model.getUrl()).append("\"");
             }
         }
         if (!sbModels.isEmpty()) {
@@ -77,7 +78,7 @@ public class PageListService {
             String getNow = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yy|HH:mm:ss"));
             StringBuilder sb = new StringBuilder();
             sb.append("\"").append(getNow).append("\"")
-                    .append("\n{\n")
+                    .append("\n{")
                     .append(sbModels)
                     .append("\n}");
             try {
@@ -208,8 +209,9 @@ public class PageListService {
             if (!startRecordingManufacturersLinks) continue;
 
             String manufName = element.getTextContent();
-            if (manufName.isBlank() || manufName.contains("Complete Manufacturer") ||
-                    ignoreManufacturersList.contains(manufName)) continue; // to be deleted TODO
+            if (manufName.isBlank() ||
+//                    ignoreManufacturersList.contains(manufName) || // to be deleted TODO
+                    manufName.contains("Complete Manufacturer")) continue;
 
             Manufacturer manufacturer = new Manufacturer(manufName, composeUrlOfManuf(semiLink));
             resultListOfManufacturers.add(manufacturer);

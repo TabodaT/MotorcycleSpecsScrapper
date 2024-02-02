@@ -40,9 +40,14 @@ public class ModelDetailsService {
     private MotoModelDTO motoModelDTO;
 
     private List<String> ignoreURLs = new ArrayList<>(Arrays.asList(
+            "https://www.motorcyclespecs.co.za/model/aprilia/Aprilia-tuono-v4-1100-factory-15.html",
+            "https://www.motorcyclespecs.co.za/model/aprilia/Aprilia-tuono-v4-1100-factory-17.html",
             "https://www.motorcyclespecs.co.za/model/Arial/ariel_square_four.htm",
             "https://www.motorcyclespecs.co.za/model/Baiai/Bajaj%20Classic%20125.htm",
-            "https://www.motorcyclespecs.co.za/model/Baiai/Bajaj%20Discover%20100M%2014.htm"));
+            "https://www.motorcyclespecs.co.za/model/Baiai/Bajaj%20Discover%20100M%2014.htm",
+            "https://www.motorcyclespecs.co.za/model/beneli/benelli_tnt_1130%2013.htm",
+            "https://www.motorcyclespecs.co.za/model/AJS/ajs_185_500cc.htm",
+            "https://www.motorcyclespecs.co.za/model/beneli/benelli_tnt_1130R%2013.htm"));
 
     public ModelDetailsService() {
         this.listOfSpecName = new ArrayList<>();
@@ -100,7 +105,7 @@ public class ModelDetailsService {
                 } catch (Exception e) {
                     StringBuilder errorSB = new StringBuilder();
                     errorSB.append("Error inserting in DB for ")
-                            .append(manufModelURLSB)
+                            .append(manufModelURLSB).append(" ")
                             .append(e);
 //                    String error = "Error inserting in DB for " + manufModelURL + " " + e;
                     logsWriterSingletonService.logError(errorSB.toString());
@@ -270,5 +275,9 @@ public class ModelDetailsService {
 //            System.out.println((i + 1) + ".\t" + listOfSpecName.get(i) + "\t" + listOfSpecValue.get(i));
 //        }
 //        System.out.println("--------------------------");
+    }
+
+    public List<String> getIgnoreURLs() {
+        return ignoreURLs;
     }
 }

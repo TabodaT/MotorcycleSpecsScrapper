@@ -4,7 +4,6 @@ import com.example.scrapping.Constants.Constants;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 public class LogsWriterSingletonService {
@@ -23,7 +22,7 @@ public class LogsWriterSingletonService {
     }
 
     public void logInsertedMotos(String motos)  {
-        addToLog(motos, Constants.INSERTED_MODELS_JSON_LOG_FILE);
+        addToLog(motos, Constants.NOT_INSERTED_MODELS_JSON_LOG_FILE);
     }
 
     private void addToLog(String errors, String file) {

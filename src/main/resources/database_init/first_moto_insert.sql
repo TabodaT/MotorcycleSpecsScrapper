@@ -1,16 +1,23 @@
 USE `motorcycles`;
 
 select * from moto_models
-where make = 'AJS' order by model asc
+-- where model = 'F 750GS'
+where make = 'BMW' and start_year = 2020
+order by model asc
 select count(*) from moto_models 
-where make = 'AJS'
+where make = 'Bajaj'
 
 insert into 
 moto_models(make,year,end_year,model,capacity,power) 
 values ('BMW',2010,2012,'R 1200gs','1200',81);
-insert into moto_models(make,model,year,end_year,engine,capacity,power,clutch,torque,abs,transmission,final_drive,seat_height,dry_weight,wet_weight,fuel_capacity,reserve,consumption,cooling_system,top_speed,url,image) values('test','test',1,1,'test',1,1,'test',1,true,1,'test',1,1,1,1.0,1,1.0,'test',1,'test','test')
+insert into moto_models(make,model,start_year,end_year,engine,capacity,power,clutch,torque,abs,transmission,final_drive,seat_height,dry_weight,wet_weight,fuel_capacity,reserve,consumption,cooling_system,top_speed,url,image) values('test','test',1,1,'test',1,1,'test',1,true,1,'test',1,1,1,1.0,1,1.0,'test',1,'test','test')
 
-delete from moto_models where id in (2)
+delete from moto_models where id in (212)
+SET SQL_SAFE_UPDATES=0
+delete from moto_models where cooling_system = '0'
+
+select id from moto_models where cooling = '0'
+
 
 select count(*) from moto_models where url = 'test';
 where year <= 2012 and end_year >= 2012
@@ -19,7 +26,8 @@ update moto_models
 set capacity = '1170'
 where id = 1 
 
-delete from moto_models where id = 1;
+delete from moto_models where year >= 0; 
+where id = 1;
 
 
 ------------------

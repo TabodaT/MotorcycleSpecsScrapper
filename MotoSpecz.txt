@@ -76,12 +76,13 @@ v	- use StringBuilder over String for concatenation
 v	- use Try-With-Resources (AutoCloseable) for handling files
 v	- fix mapping cooling
 v	- fix logic of adding motorcycles with no year
-	- make seat height double
+v	- make seat height double
+v	- log not inserted
+v	- create a map to ignore when marking erroneous
+v	- delete list of manuf to ignore
 	- fix moto with year > 9999
 	- fix mapping torque
-	- create a map to ignore when marking erroneous
 	- adapt ModelDetailsService.getModelDetails to look inside other tables because "table24" does not apply everywhere
-	- delete list of manuf to ignore
 
 Maybe also:
 	- change location of mysql DB: https://stackoverflow.com/questions/1795176/how-to-change-mysql-data-directory
