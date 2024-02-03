@@ -80,17 +80,11 @@ v	- make seat height double
 v	- log not inserted
 v	- create a map to ignore when marking erroneous
 v	- delete list of manuf to ignore
-	- fix moto with year > 9999
+v	- add more ways to find capacity (start of string or in model name)
 	- fix mapping torque
+	- fix moto with year > 9999
 	- adapt ModelDetailsService.getModelDetails to look inside other tables because "table24" does not apply everywhere
 
 Maybe also:
 	- change location of mysql DB: https://stackoverflow.com/questions/1795176/how-to-change-mysql-data-directory
 	
-	
-Scrapped (0)	Inserted in db (1):
-0	1
-v	v	- AJP
-v	v	- AJS
-		- Aprilia
-v		- Brough Superior

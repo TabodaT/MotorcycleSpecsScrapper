@@ -38,8 +38,8 @@ public class PageListService {
     public void startScrapping() {
         try {
 
-//            scrapeOneModelByUrl("Benelli","TRK 800",
-//                    "https://www.motorcyclespecs.co.za/model/beneli/benelli_trk_800_22.html","2022");
+//            scrapeOneModelByUrl("Excelsior","Super X",
+//                    "https://www.motorcyclespecs.co.za/model/Classic/Excelsior-Henderson%20superx.htm","1998");
 
 //            modelsToDataBaseService.existsInDB("test");
 
@@ -48,6 +48,7 @@ public class PageListService {
                 getModelsOfManuf(manufacturer);
                 getModelsDetailsAndAddToDB(manufacturer);
                 logNotInsertedMotos(manufacturer);
+                System.gc();
             }
         } catch (Exception e) {
             log.error("Something is wrong: " + e);
@@ -150,7 +151,7 @@ public class PageListService {
                     }
                     if (productionYears.isEmpty()) continue;
 
-                    ModelOfManuf modelOfManuf = new ModelOfManuf(modelName, url, productionYears, pageCounter);
+                    ModelOfManuf modelOfManuf = new ModelOfManuf(modelName, url, productionYears, pageCounter-1);
                     manufacturer.addModel(modelOfManuf);
 
 //                    if (modelOfManuf.getUrl().isEmpty()) continue;

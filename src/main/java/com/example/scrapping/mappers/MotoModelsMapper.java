@@ -7,7 +7,6 @@ import com.example.scrapping.service.LogsWriterSingletonService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -40,12 +39,12 @@ public class MotoModelsMapper {
         this.erroneous = false;
 
         MotoModelDTO motoModelDTO = new MotoModelDTO();
-        String modelName = modelOfManuf.getName();
+//        String modelName = modelOfManuf.getName();
 
         //   make
         motoModelDTO.setMake(manufacturer.getName());
         //   model
-        motoModelDTO.setModel(modelOfManuf.getName());
+        motoModelDTO.setModel(modelOfManuf.getName().replaceAll("'", "\\\\'"));
         //   year
         motoModelDTO.setStartYear(Integer.parseInt(getSpecValue("year")));
         if (motoModelDTO.getStartYear() == 0) {
@@ -188,9 +187,9 @@ public class MotoModelsMapper {
                     break;
                 }
                 if (specName.equals("reserve")) {
-                    result = formatMetricUnit(valueOfSpecAtI, "l");
+                    result = formatMetricUnit(valueOfSpecAtI, "litre");
                     if (result.equals("0")) {
-                        result = formatMetricUnit(valueOfSpecAtI, "litre");
+                        result = formatMetricUnit(valueOfSpecAtI, "l");
                     }
                     break;
                 }
@@ -216,7 +215,11 @@ public class MotoModelsMapper {
                     break;
                 }
             } else if (nameOfSpecAtI.contains(specName)) {                   // CONTAINS
-                if (nameOfSpecAtI.contains("power") && !nameOfSpecAtI.contains("weight")) {
+                boolean itExistsButItsEmpty = valueOfSpecAtI.trim().toLowerCase().contains("n/a")
+                        || valueOfSpecAtI.trim().toLowerCase().contains("na")
+                        || valueOfSpecAtI.trim().isEmpty();
+                if (nameOfSpecAtI.contains("power") && !nameOfSpecAtI.contains("weight") && !nameOfSpecAtI.contains("rear")) {
+                    if (itExistsButItsEmpty) break;
                     containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "kw");
                     break;
@@ -227,11 +230,13 @@ public class MotoModelsMapper {
                     break;
                 }
                 if (specName.equals("torque")) {
+                    if (itExistsButItsEmpty) break;
                     containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "nm");
                     break;
                 }
                 if (nameOfSpecAtI.contains("dry") || nameOfSpecAtI.contains("wet")) {
+                    if (itExistsButItsEmpty) break;
                     containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "kg");
                     break;
@@ -313,7 +318,7 @@ public class MotoModelsMapper {
                 }
             } else if (rawSpecValue.toLowerCase().contains("mpg")) {
                 preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("mpg")).trim().replaceAll(" ", "");
-                result = getNumberFromEndOfString(preFormat);
+                result = getNumberFromBeginningOrEndOfString(preFormat, false);
                 DecimalFormat df = new DecimalFormat("#.#");
                 double lPer100km = 235.21 / Double.parseDouble(result);
                 result = df.format(lPer100km);
@@ -329,32 +334,65 @@ public class MotoModelsMapper {
         String result = "";
         if (rawSpecValue.toLowerCase().contains(unit)) {
             String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf(unit)).trim().replaceAll(" ", "");
-            result = getNumberFromEndOfString(preFormat);
+            result = getNumberFromBeginningOrEndOfString(preFormat, false);
+        } else {
+            String preFormat2 = (rawSpecValue.toLowerCase().trim()).replaceAll(" ", "");
+            if (unit.equals("cc")) {
+                result = getNumberFromBeginningOrEndOfString(preFormat2, true);
+                if (result.isEmpty())
+                    result = getNumberFromBeginningOrEndOfString(modelOfManuf.getName(), true);
+            } else if (unit.equals("nm") && rawSpecValue.toLowerCase().contains("kg")) {
+                String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("kg")).trim().replaceAll(" ", "");
+                double kgM = Double.parseDouble(getNumberFromBeginningOrEndOfString(preFormat, false));
+                DecimalFormat df = new DecimalFormat("#");
+                result = String.valueOf(df.format(9.80665 * kgM));
+            } else if (unit.equals("kw") && rawSpecValue.toLowerCase().contains("hp")) {
+                String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("hp")).trim().replaceAll(" ", "");
+                result = getNumberFromBeginningOrEndOfString(preFormat, false);
+            } else if (unit.equals("mm")) {
+                if (preFormat2.contains("in")) {
+                    String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("in")).trim().replaceAll(" ", "");
+                    double in = Double.parseDouble(getNumberFromBeginningOrEndOfString(preFormat, false));
+                    DecimalFormat df = new DecimalFormat("#");
+                    result = String.valueOf(df.format(25.4 * in));
+                } else
+                    result = getNumberFromBeginningOrEndOfString(preFormat2, true);
+            } else if (unit.equals("kg") && rawSpecValue.contains("lb")) {
+                    String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("lb")).trim().replaceAll(" ", "");
+                    double lb = Double.parseDouble(getNumberFromBeginningOrEndOfString(preFormat, false));
+                    DecimalFormat df = new DecimalFormat("#");
+                    result = String.valueOf(df.format(0.453592 * lb));
+            }
         }
         return result.isEmpty() ? "0" : result;
     }
 
-    private String getNumberFromEndOfString(String preFormat) {
-//        String result = "";
+    private String getNumberFromBeginningOrEndOfString(String preFormat, Boolean startFromBeginningOfString) {
         StringBuilder resultSB = new StringBuilder();
         if (preFormat.length() > 1) {
             boolean foundDigit = false;
+            boolean foundDot = false;
             for (int i = preFormat.length() - 1; i >= 0; i--) {
-                char c = preFormat.charAt(i);
+                int k = i;
+                if (startFromBeginningOfString) k = preFormat.length() - 1 - i;
+                char c = preFormat.charAt(k);
                 if (!foundDigit) {
-                    if (Character.isDigit(c) || c == '.') {
+                    if (Character.isDigit(c)) {
                         foundDigit = true;
                     }
                     if (!foundDigit) continue;
                 }
                 if (Character.isDigit(c) || c == '.') {
-//                    result = c + result;
-                    resultSB.insert(0, c);
+                    if (foundDot && c == '.') break;
+                    if (startFromBeginningOfString)
+                        resultSB.append(c);
+                    else
+                        resultSB.insert(0, c);
+                    if (c == '.') foundDot = true;
                 } else break;
             }
         } else if (preFormat.length() == 1) {
             if (Character.isDigit(preFormat.charAt(0))) {
-//                result = preFormat;
                 resultSB.append(preFormat);
             }
         }

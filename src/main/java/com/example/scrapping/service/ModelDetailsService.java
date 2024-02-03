@@ -42,6 +42,10 @@ public class ModelDetailsService {
     private List<String> ignoreURLs = new ArrayList<>(Arrays.asList(
             "https://www.motorcyclespecs.co.za/model/aprilia/Aprilia-tuono-v4-1100-factory-15.html",
             "https://www.motorcyclespecs.co.za/model/aprilia/Aprilia-tuono-v4-1100-factory-17.html",
+            "https://www.motorcyclespecs.co.za/model/aprilia/Aprilia-tuono-v4-1100rr-15.html",
+            "https://www.motorcyclespecs.co.za/model/aprilia/Aprilia-tuono-v4-1100-17.html",
+            "https://www.motorcyclespecs.co.za/model/aprilia/aprilia_sx_125%2009.htm",
+            "https://www.motorcyclespecs.co.za/model/aprilia/Aprilia-tuono-v4-1100-factory-19.html",
             "https://www.motorcyclespecs.co.za/model/Arial/ariel_square_four.htm",
             "https://www.motorcyclespecs.co.za/model/Baiai/Bajaj%20Classic%20125.htm",
             "https://www.motorcyclespecs.co.za/model/Baiai/Bajaj%20Discover%20100M%2014.htm",
@@ -95,7 +99,8 @@ public class ModelDetailsService {
             if (!motoModelsMapper.isErroneous() && !motoModelDTO.getModel().isEmpty()) {
                 boolean wasInserted = false;
                 StringBuilder manufModelURLSB = new StringBuilder();
-                manufModelURLSB.append(manufacturer.getUrl()).append(" ")
+                manufModelURLSB.append(modelOfManuf.getPage()).append(". ")
+                        .append(manufacturer.getName()).append(" ")
                         .append(modelOfManuf.getName()).append(" ")
                         .append(modelOfManuf.getProductionYears()).append(" ")
                         .append(modelOfManuf.getUrl());
