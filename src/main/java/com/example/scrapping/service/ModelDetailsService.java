@@ -189,7 +189,7 @@ public class ModelDetailsService {
         for (String wordOfModelName : modelNameWords) {
             if (wordOfModelName.length() > 2 && imageJPG.toLowerCase().contains(wordOfModelName.toLowerCase())) ;
             {
-                imageFile = formattedImgLink.substring(formattedImgLink.lastIndexOf("/") + 1);
+                imageFile = formattedImgLink.substring(formattedImgLink.lastIndexOf("/") + 1).replaceAll("'","");
 //                System.out.println("formattedImgLink: " + formattedImgLink); // to be deleted
                 return true;
             }

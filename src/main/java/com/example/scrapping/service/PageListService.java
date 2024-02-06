@@ -38,8 +38,8 @@ public class PageListService {
     public void startScrapping() {
         try {
 
-//            scrapeOneModelByUrl("Excelsior","Super X",
-//                    "https://www.motorcyclespecs.co.za/model/Classic/Excelsior-Henderson%20superx.htm","1998");
+//            scrapeOneModelByUrl("Harley Davidson","Road King Screamin' Eagle CVO FLHR",
+//                    "https://www.motorcyclespecs.co.za/model/h-d/harley_davidson_flhrse4%20cvo%20scr%20ealgle%20_road_ki%20%2008.htm","2008");
 
 //            modelsToDataBaseService.existsInDB("test");
 
@@ -184,9 +184,6 @@ public class PageListService {
 
     private List<Manufacturer> getListOfManufacturers() throws IOException {
         List<Manufacturer> resultListOfManufacturers = new ArrayList<>();
-//        WebClient client = new WebClient();
-//        client.getOptions().setCssEnabled(false);
-//        client.getOptions().setJavaScriptEnabled(false);
         HtmlPage page;
 
         try(WebClient client = new WebClient()) {
@@ -211,7 +208,7 @@ public class PageListService {
 
             String manufName = element.getTextContent();
             if (manufName.isBlank() ||
-//                    ignoreManufacturersList.contains(manufName) || // to be deleted TODO
+                    ignoreManufacturersList.contains(manufName) || // to be deleted TODO
                     manufName.contains("Complete Manufacturer")) continue;
 
             Manufacturer manufacturer = new Manufacturer(manufName, composeUrlOfManuf(semiLink));

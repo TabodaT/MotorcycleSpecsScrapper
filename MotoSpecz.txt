@@ -81,10 +81,23 @@ v	- log not inserted
 v	- create a map to ignore when marking erroneous
 v	- delete list of manuf to ignore
 v	- add more ways to find capacity (start of string or in model name)
-	- fix mapping torque
+v	- fix mapping torque
+	- why no Avinton / Wakan?
+	- table24 not found are not working links?
+	- fix mapping speed: mph
 	- fix moto with year > 9999
+	- 1/76: Blast (2007-09) https://www.motorcyclespecs.co.za/model/buell/buell_blast%2007.htm Some error while getting models details Buell / EBR java.nio.file.InvalidPathException: Trailin
 	- adapt ModelDetailsService.getModelDetails to look inside other tables because "table24" does not apply everywhere
 
 Maybe also:
 	- change location of mysql DB: https://stackoverflow.com/questions/1795176/how-to-change-mysql-data-directory
 	
+new ArrayList<>(Arrays.asList(
+"AJP",
+"AJS",
+"Aprilia",
+"Ariel",
+"Bajaj",
+"Beta",
+"Bimota",
+));

@@ -18,7 +18,7 @@ public class MotoModelsRepository {
 
     // Create
     public int insertMoto(MotoModelDTO motoModelDTO) {
-        String sql =  String.format( getSqlText(Constants.INSERT_MOTO_SCRIPT), motoModelDTO.getMake() , motoModelDTO.getModel(), motoModelDTO.getStartYear(),
+        String sql = String.format(getSqlText(Constants.INSERT_MOTO_SCRIPT), motoModelDTO.getMake(), motoModelDTO.getModel(), motoModelDTO.getStartYear(),
                 motoModelDTO.getEndYear(), motoModelDTO.getEngine(), motoModelDTO.getCapacity(), motoModelDTO.getPower(),
                 motoModelDTO.getClutch(), motoModelDTO.getTorque(), motoModelDTO.isAbs(), motoModelDTO.getTransmission(),
                 motoModelDTO.getFinalDrive(), motoModelDTO.getSeatHeight(), motoModelDTO.getDryWeight(), motoModelDTO.getWetWeight(),
@@ -37,7 +37,8 @@ public class MotoModelsRepository {
         } catch (DataAccessException e) {
             System.out.println(e);
         }
-        System.out.println(motoModelCount == 0 ? "Not in DB" : "Exists in DB");
+        String inDB = motoModelCount == 0 ? "Not in DB: " : "Exists in DB: ";
+        System.out.println(inDB + url);
         return motoModelCount;
     }
 

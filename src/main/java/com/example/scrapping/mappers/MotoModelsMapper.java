@@ -227,6 +227,10 @@ public class MotoModelsMapper {
                 if ((specName.equals("drive") && nameOfSpecAtI.contains("final")) || specName.equals("cooling")) {
                     containsSpec = true;
                     result = valueOfSpecAtI;
+                    if (specName.equals("drive") && result.length() > 100) {
+                        containsSpec = true;
+                        result = "0";
+                    }
                     break;
                 }
                 if (specName.equals("torque")) {
@@ -242,6 +246,7 @@ public class MotoModelsMapper {
                     break;
                 }
                 if (specName.equals("seat")) {
+                    if (itExistsButItsEmpty) break;
                     containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "mm");
                     break;
@@ -278,6 +283,7 @@ public class MotoModelsMapper {
                 if (specName.equals("transmission")) {
                     containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "speed");
+                    result = result.equals("0") ? "1" : result;
                     break;
                 }
             }
@@ -310,18 +316,15 @@ public class MotoModelsMapper {
         try {
             if (rawSpecValue.toLowerCase().contains("km")) {
                 preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("km")).trim().replaceAll(" ", "").substring(0, rawSpecValue.toLowerCase().indexOf("l"));
-                for (int i = 0; i < preFormat.length(); i++) {
-                    char c = preFormat.charAt(i);
-                    if (Character.isDigit(c) || c == '.') {
-                        result = result + c;
-                    }
-                }
+                result = getNumberFromBeginningOrEndOfString(preFormat, true);
             } else if (rawSpecValue.toLowerCase().contains("mpg")) {
                 preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("mpg")).trim().replaceAll(" ", "");
                 result = getNumberFromBeginningOrEndOfString(preFormat, false);
                 DecimalFormat df = new DecimalFormat("#.#");
                 double lPer100km = 235.21 / Double.parseDouble(result);
                 result = df.format(lPer100km);
+            } else if (rawSpecValue.toLowerCase().contains("kwh")) {
+                result = getNumberFromBeginningOrEndOfString(rawSpecValue, false);
             }
         } catch (Exception e) {
             System.out.println("Consumption err: " + e);
@@ -358,10 +361,20 @@ public class MotoModelsMapper {
                 } else
                     result = getNumberFromBeginningOrEndOfString(preFormat2, true);
             } else if (unit.equals("kg") && rawSpecValue.contains("lb")) {
-                    String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("lb")).trim().replaceAll(" ", "");
-                    double lb = Double.parseDouble(getNumberFromBeginningOrEndOfString(preFormat, false));
-                    DecimalFormat df = new DecimalFormat("#");
-                    result = String.valueOf(df.format(0.453592 * lb));
+                String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("lb")).trim().replaceAll(" ", "");
+                double lb = Double.parseDouble(getNumberFromBeginningOrEndOfString(preFormat, false));
+                DecimalFormat df = new DecimalFormat("#");
+                result = String.valueOf(df.format(0.453592 * lb));
+            } else if (unit.equals("kph") && rawSpecValue.contains("mph")) {
+                String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("mph")).trim().replaceAll(" ", "");
+                double mph = Double.parseDouble(getNumberFromBeginningOrEndOfString(preFormat, false));
+                DecimalFormat df = new DecimalFormat("#");
+                result = String.valueOf(df.format(1.609 * mph));
+            } else if (unit.equals("nm") && result == "" && rawSpecValue.contains("ft")) {
+                String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("ft")).trim().replaceAll(" ", "");
+                double ftLb = Double.parseDouble(getNumberFromBeginningOrEndOfString(preFormat, false));
+                DecimalFormat df = new DecimalFormat("#");
+                result = String.valueOf(df.format(ftLb * 1.3558));
             }
         }
         return result.isEmpty() ? "0" : result;
@@ -402,6 +415,13 @@ public class MotoModelsMapper {
     private String formatYear(String year) {
         String result = "0";
         String yearsToBeFormatted = year.isEmpty() ? modelProductionYears : year;
+        for (char c : year.toCharArray()) {
+            if (Character.isLetter(c)) {
+                yearsToBeFormatted = modelProductionYears;
+                break;
+            }
+        }
+
         String[] years = yearsToBeFormatted.trim().replaceAll(" ", "").split("-");
         if (years.length > 0) result = years[0];
 
