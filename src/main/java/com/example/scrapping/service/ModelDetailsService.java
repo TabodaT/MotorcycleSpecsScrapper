@@ -51,6 +51,7 @@ public class ModelDetailsService {
             "https://www.motorcyclespecs.co.za/model/Baiai/Bajaj%20Discover%20100M%2014.htm",
             "https://www.motorcyclespecs.co.za/model/beneli/benelli_tnt_1130%2013.htm",
             "https://www.motorcyclespecs.co.za/model/AJS/ajs_185_500cc.htm",
+            "https://www.motorcyclespecs.co.za/model/CF_Moto/CF_Moto_250_Freedom.html",
             "https://www.motorcyclespecs.co.za/model/beneli/benelli_tnt_1130R%2013.htm"));
 
     public ModelDetailsService() {

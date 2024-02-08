@@ -62,7 +62,7 @@ public class MotoModelsMapper {
 
         if (listOfSpecName.size() > 0) {
             //   engine
-            motoModelDTO.setEngine(getSpecValue("engine"));
+            motoModelDTO.setEngine(getSpecValue("engine").replaceAll("'","\\\\'"));
             if (containsSpec && motoModelDTO.getEngine().equals("0"))
                 logError("engine");
             //   capacity
@@ -218,7 +218,7 @@ public class MotoModelsMapper {
                 boolean itExistsButItsEmpty = valueOfSpecAtI.trim().toLowerCase().contains("n/a")
                         || valueOfSpecAtI.trim().toLowerCase().contains("na")
                         || valueOfSpecAtI.trim().isEmpty();
-                if (nameOfSpecAtI.contains("power") && !nameOfSpecAtI.contains("weight") && !nameOfSpecAtI.contains("rear")) {
+                if (nameOfSpecAtI.contains("power") && !nameOfSpecAtI.contains("weight") && !nameOfSpecAtI.contains("rear") && !nameOfSpecAtI.contains("transmission")) {
                     if (itExistsButItsEmpty) break;
                     containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "kw");
@@ -416,7 +416,7 @@ public class MotoModelsMapper {
         String result = "0";
         String yearsToBeFormatted = year.isEmpty() ? modelProductionYears : year;
         for (char c : year.toCharArray()) {
-            if (Character.isLetter(c)) {
+            if (Character.isLetter(c) || c == '/' || c == ':' ) {
                 yearsToBeFormatted = modelProductionYears;
                 break;
             }

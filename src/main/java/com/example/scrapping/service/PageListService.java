@@ -38,18 +38,18 @@ public class PageListService {
     public void startScrapping() {
         try {
 
-//            scrapeOneModelByUrl("Harley Davidson","Road King Screamin' Eagle CVO FLHR",
-//                    "https://www.motorcyclespecs.co.za/model/h-d/harley_davidson_flhrse4%20cvo%20scr%20ealgle%20_road_ki%20%2008.htm","2008");
+            scrapeOneModelByUrl("BMW","C Evolution",
+                    "https://www.motorcyclespecs.co.za/model/bmw/bmw-c1e-17.html","2017");
 
 //            modelsToDataBaseService.existsInDB("test");
 
-            listOfManufacturers = getListOfManufacturers();
-            for (Manufacturer manufacturer : listOfManufacturers) {
-                getModelsOfManuf(manufacturer);
-                getModelsDetailsAndAddToDB(manufacturer);
-                logNotInsertedMotos(manufacturer);
-                System.gc();
-            }
+//            listOfManufacturers = getListOfManufacturers();
+//            for (Manufacturer manufacturer : listOfManufacturers) {
+//                getModelsOfManuf(manufacturer);
+//                getModelsDetailsAndAddToDB(manufacturer);
+//                logNotInsertedMotos(manufacturer);
+//                System.gc();
+//            }
         } catch (Exception e) {
             log.error("Something is wrong: " + e);
         }
