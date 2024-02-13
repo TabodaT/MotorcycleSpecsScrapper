@@ -52,6 +52,11 @@ public class ModelDetailsService {
             "https://www.motorcyclespecs.co.za/model/beneli/benelli_tnt_1130%2013.htm",
             "https://www.motorcyclespecs.co.za/model/AJS/ajs_185_500cc.htm",
             "https://www.motorcyclespecs.co.za/model/CF_Moto/CF_Moto_250_Freedom.html",
+            "https://www.motorcyclespecs.co.za/model/h-d/harley_davidson_xl1000.htm",
+            "https://www.motorcyclespecs.co.za/model/h-d/harley_davidson_xlh1000.htm",
+            "https://www.motorcyclespecs.co.za/model/h-d/harley_davidson_fx_1200%2071.htm",
+            "https://www.motorcyclespecs.co.za/H-D.htm",
+            "https://www.motorcyclespecs.co.za/model/Honda/honda_CLR%20125%20CityFly.htm",
             "https://www.motorcyclespecs.co.za/model/beneli/benelli_tnt_1130R%2013.htm"));
 
     public ModelDetailsService() {
@@ -80,7 +85,7 @@ public class ModelDetailsService {
             try {
                 table24 = page.getHtmlElementById("table24");
             } catch (Exception e) {
-                logErrorInGetModel(manufacturer, modelOfManuf, "table24 not found: page=", e);
+//                logErrorInGetModel(manufacturer, modelOfManuf, "table24 not found: page=", e); // todo uncomment this and add motorcycles
                 continue;
             }
             getImageOfTheModel(table24, manufacturer.getName(), modelOfManuf.getName());
@@ -180,18 +185,16 @@ public class ModelDetailsService {
 
     private boolean findModelOrManufNameInImageLink(String link, String modelName, String manufName) {
         String formattedImgLink = link.replace("%20", "").replace("-", "");
+        String imageFile1 = formattedImgLink.substring(formattedImgLink.lastIndexOf("/") + 1).replaceAll("'", "");
         if (formattedImgLink.toLowerCase().contains(manufName)) {
-            imageFile = formattedImgLink.substring(formattedImgLink.lastIndexOf("/") + 1);
-//            System.out.println("formattedImgLink: " + formattedImgLink); // to be deleted
+            imageFile = imageFile1;
             return true;
         }
         String[] modelNameWords = removeAllNotLettersNumbersOrSpace(modelName).split(" ");
         String imageJPG = formattedImgLink.substring(formattedImgLink.lastIndexOf("/"));
         for (String wordOfModelName : modelNameWords) {
-            if (wordOfModelName.length() > 2 && imageJPG.toLowerCase().contains(wordOfModelName.toLowerCase())) ;
-            {
-                imageFile = formattedImgLink.substring(formattedImgLink.lastIndexOf("/") + 1).replaceAll("'","");
-//                System.out.println("formattedImgLink: " + formattedImgLink); // to be deleted
+            if (wordOfModelName.length() > 2 && imageJPG.toLowerCase().contains(wordOfModelName.toLowerCase())){
+                imageFile = imageFile1;
                 return true;
             }
         }

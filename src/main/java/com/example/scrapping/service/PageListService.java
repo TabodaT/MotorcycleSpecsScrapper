@@ -38,18 +38,18 @@ public class PageListService {
     public void startScrapping() {
         try {
 
-            scrapeOneModelByUrl("BMW","C Evolution",
-                    "https://www.motorcyclespecs.co.za/model/bmw/bmw-c1e-17.html","2017");
+//            scrapeOneModelByUrl("BMW","HP4 Race",
+//                    "https://www.motorcyclespecs.co.za/model/bmw/bmw-hp4-race.html","2018");
 
 //            modelsToDataBaseService.existsInDB("test");
 
-//            listOfManufacturers = getListOfManufacturers();
-//            for (Manufacturer manufacturer : listOfManufacturers) {
-//                getModelsOfManuf(manufacturer);
-//                getModelsDetailsAndAddToDB(manufacturer);
-//                logNotInsertedMotos(manufacturer);
-//                System.gc();
-//            }
+            listOfManufacturers = getListOfManufacturers();
+            for (Manufacturer manufacturer : listOfManufacturers) {
+                getModelsOfManuf(manufacturer);
+                getModelsDetailsAndAddToDB(manufacturer);
+                logNotInsertedMotos(manufacturer);
+                System.gc();
+            }
         } catch (Exception e) {
             log.error("Something is wrong: " + e);
         }
@@ -243,7 +243,7 @@ public class PageListService {
     }
 
     private String composeUrlOfManuf(String semiLink) {
-        String manuf = semiLink.substring(semiLink.lastIndexOf("/") + 1);
+        String manuf = semiLink.substring(semiLink.lastIndexOf("/") + 1).replaceAll("'", "\\\\'");
         return Constants.MOTORCYCLESPECS_CO_ZA + BIKES + manuf;
     }
 

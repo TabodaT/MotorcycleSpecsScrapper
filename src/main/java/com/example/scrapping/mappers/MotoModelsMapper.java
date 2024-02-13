@@ -217,8 +217,10 @@ public class MotoModelsMapper {
             } else if (nameOfSpecAtI.contains(specName)) {                   // CONTAINS
                 boolean itExistsButItsEmpty = valueOfSpecAtI.trim().toLowerCase().contains("n/a")
                         || valueOfSpecAtI.trim().toLowerCase().contains("na")
-                        || valueOfSpecAtI.trim().isEmpty();
-                if (nameOfSpecAtI.contains("power") && !nameOfSpecAtI.contains("weight") && !nameOfSpecAtI.contains("rear") && !nameOfSpecAtI.contains("transmission")) {
+                        || valueOfSpecAtI.trim().toLowerCase().contains("n.a")
+                        || valueOfSpecAtI.trim().replaceAll(" ","").replaceAll("\n","").isEmpty();
+                if (nameOfSpecAtI.contains("power") && !nameOfSpecAtI.contains("weight") && !nameOfSpecAtI.contains("rear")
+                        && !nameOfSpecAtI.contains("transmission") && !nameOfSpecAtI.contains("pack")) {
                     if (itExistsButItsEmpty) break;
                     containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "kw");
@@ -227,10 +229,6 @@ public class MotoModelsMapper {
                 if ((specName.equals("drive") && nameOfSpecAtI.contains("final")) || specName.equals("cooling")) {
                     containsSpec = true;
                     result = valueOfSpecAtI;
-                    if (specName.equals("drive") && result.length() > 100) {
-                        containsSpec = true;
-                        result = "0";
-                    }
                     break;
                 }
                 if (specName.equals("torque")) {
@@ -267,7 +265,7 @@ public class MotoModelsMapper {
                     }
                     break;
                 }
-                if (specName.equals("speed")) {
+                if (specName.equals("speed") && !nameOfSpecAtI.toLowerCase().contains("idle")) {
                     containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "km");
                     if (result.equals("0")) {

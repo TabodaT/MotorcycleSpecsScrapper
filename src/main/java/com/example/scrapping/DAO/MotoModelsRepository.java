@@ -38,7 +38,7 @@ public class MotoModelsRepository {
             System.out.println(e);
         }
         String inDB = motoModelCount == 0 ? "Not in DB: " : "Exists in DB: ";
-        System.out.println(inDB + url);
+        if(motoModelCount == 1) System.out.println(inDB + url);
         return motoModelCount;
     }
 
