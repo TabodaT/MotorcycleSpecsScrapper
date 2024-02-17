@@ -30,7 +30,6 @@ public class MotoModelsRepository {
 
     public int queryCountByUrl(String url) {
         String sql = String.format(getSqlText(Constants.COUNT_MOTO_BY_URL), url);
-//        String sql = getSqlText(Constants.COUNT_MOTO_BY_URL) + "'" + url + "';";
         int motoModelCount = 0;
         try {
             motoModelCount = jdbcTemplate.queryForObject(sql, Integer.class);
@@ -38,7 +37,7 @@ public class MotoModelsRepository {
             System.out.println(e);
         }
         String inDB = motoModelCount == 0 ? "Not in DB: " : "Exists in DB: ";
-        if(motoModelCount == 1) System.out.println(inDB + url);
+        if (motoModelCount == 0 && !url.endsWith("Contact.htm") && !url.endsWith("index.htm")) System.out.println(inDB + url);
         return motoModelCount;
     }
 

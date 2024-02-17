@@ -40,24 +40,9 @@ public class ModelDetailsService {
     private MotoModelDTO motoModelDTO;
 
     private List<String> ignoreURLs = new ArrayList<>(Arrays.asList(
-            "https://www.motorcyclespecs.co.za/model/aprilia/Aprilia-tuono-v4-1100-factory-15.html",
-            "https://www.motorcyclespecs.co.za/model/aprilia/Aprilia-tuono-v4-1100-factory-17.html",
-            "https://www.motorcyclespecs.co.za/model/aprilia/Aprilia-tuono-v4-1100rr-15.html",
-            "https://www.motorcyclespecs.co.za/model/aprilia/Aprilia-tuono-v4-1100-17.html",
-            "https://www.motorcyclespecs.co.za/model/aprilia/aprilia_sx_125%2009.htm",
-            "https://www.motorcyclespecs.co.za/model/aprilia/Aprilia-tuono-v4-1100-factory-19.html",
-            "https://www.motorcyclespecs.co.za/model/Arial/ariel_square_four.htm",
-            "https://www.motorcyclespecs.co.za/model/Baiai/Bajaj%20Classic%20125.htm",
-            "https://www.motorcyclespecs.co.za/model/Baiai/Bajaj%20Discover%20100M%2014.htm",
-            "https://www.motorcyclespecs.co.za/model/beneli/benelli_tnt_1130%2013.htm",
-            "https://www.motorcyclespecs.co.za/model/AJS/ajs_185_500cc.htm",
-            "https://www.motorcyclespecs.co.za/model/CF_Moto/CF_Moto_250_Freedom.html",
-            "https://www.motorcyclespecs.co.za/model/h-d/harley_davidson_xl1000.htm",
-            "https://www.motorcyclespecs.co.za/model/h-d/harley_davidson_xlh1000.htm",
-            "https://www.motorcyclespecs.co.za/model/h-d/harley_davidson_fx_1200%2071.htm",
-            "https://www.motorcyclespecs.co.za/H-D.htm",
-            "https://www.motorcyclespecs.co.za/model/Honda/honda_CLR%20125%20CityFly.htm",
-            "https://www.motorcyclespecs.co.za/model/beneli/benelli_tnt_1130R%2013.htm"));
+                "https://www.motorcyclespecs.co.za/H-D.htm",
+                "https://www.motorcyclespecs.co.za/model/Honda/honda_rc51_sp2_nicky_hayden.html"
+            ));
 
     public ModelDetailsService() {
         this.listOfSpecName = new ArrayList<>();
@@ -72,6 +57,7 @@ public class ModelDetailsService {
             if (ignoreURLs.contains(modelOfManuf.getUrl())) continue; // to be deleted todo
             printModelBeingScrapped(modelsCounter,nrOfModels,modelOfManuf);
             modelsCounter++;
+            boolean hasTable24 = true;
 
             try(WebClient client = new WebClient()) {
                 client.getOptions().setCssEnabled(false);
@@ -86,39 +72,47 @@ public class ModelDetailsService {
                 table24 = page.getHtmlElementById("table24");
             } catch (Exception e) {
 //                logErrorInGetModel(manufacturer, modelOfManuf, "table24 not found: page=", e); // todo uncomment this and add motorcycles
-                continue;
+                hasTable24 = false;
             }
-            getImageOfTheModel(table24, manufacturer.getName(), modelOfManuf.getName());
-            savePicturesOfModels(imageLink, manufacturer.getName(), modelOfManuf.getName());
-            getDataFromTable(table24);
 
-            printScrapedTable(); // to be deleted
+            if (hasTable24) {
+                getImageOfTheModel(table24, manufacturer.getName(), modelOfManuf.getName());
+                savePicturesOfModels(imageLink, manufacturer.getName(), modelOfManuf.getName());
+                getDataFromTable(table24);
 
-            try {
-                motoModelDTO = motoModelsMapper.mapMotoModel(listOfSpecName, listOfSpecValue, manufacturer, modelOfManuf, imageFile);
-            } catch (Exception e) {
-                logErrorInGetModel(manufacturer, modelOfManuf, "Error mapping model: page=", e);
-                continue;
+                printScrapedTable(); // to be deleted
+
+                try {
+                    motoModelDTO = motoModelsMapper.mapMotoModel(listOfSpecName, listOfSpecValue, manufacturer, modelOfManuf, imageFile);
+                } catch (Exception e) {
+                    logErrorInGetModel(manufacturer, modelOfManuf, "Error mapping model: page=", e);
+                    continue;
+                }
+            } else {
+                try {
+                    motoModelDTO = motoModelsMapper.mapMotoModelWithoutTable24(manufacturer,modelOfManuf);
+                } catch (Exception e) {
+                    logErrorInGetModel(manufacturer, modelOfManuf, "Error mapping (table24) model: page=", e);
+                    continue;
+                }
             }
 //            System.out.println(motoModelDTO); // to be deleted
 
             if (!motoModelsMapper.isErroneous() && !motoModelDTO.getModel().isEmpty()) {
                 boolean wasInserted = false;
-                StringBuilder manufModelURLSB = new StringBuilder();
-                manufModelURLSB.append(modelOfManuf.getPage()).append(". ")
-                        .append(manufacturer.getName()).append(" ")
-                        .append(modelOfManuf.getName()).append(" ")
-                        .append(modelOfManuf.getProductionYears()).append(" ")
-                        .append(modelOfManuf.getUrl());
-//                String manufModelURL = manufacturer.getUrl() + " " + modelOfManuf.getName() + " " + modelOfManuf.getProductionYears() + " " + modelOfManuf.getUrl();
                 try {
                     wasInserted = modelsToDataBaseService.insertMoto(motoModelDTO) == 1;
                 } catch (Exception e) {
+                    StringBuilder manufModelURLSB = new StringBuilder();
+                    manufModelURLSB.append(modelOfManuf.getPage()).append(". ")
+                            .append(manufacturer.getName()).append(" ")
+                            .append(modelOfManuf.getName()).append(" ")
+                            .append(modelOfManuf.getProductionYears()).append(" ")
+                            .append(modelOfManuf.getUrl());
                     StringBuilder errorSB = new StringBuilder();
                     errorSB.append("Error inserting in DB for ")
                             .append(manufModelURLSB).append(" ")
                             .append(e);
-//                    String error = "Error inserting in DB for " + manufModelURL + " " + e;
                     logsWriterSingletonService.logError(errorSB.toString());
                     System.out.println(errorSB);
                 }
@@ -213,7 +207,13 @@ public class ModelDetailsService {
 
     private void savePicturesOfModels(String imageLink, String manufacturer, String model) throws IOException {
         String allManufacturersFolder = "D:/Learning/Projects/Scrapping Projects/MotorcycleSpecsScrapper/Scrapped Images DB";
-        String picturesPathBase = allManufacturersFolder + "/" + manufacturer;
+        String picturesPathBase = "";
+        if (manufacturer.contains("/")){
+            String firstManuf = manufacturer.split("/")[0].trim();
+            picturesPathBase = picturesPathBase = allManufacturersFolder + "/" + firstManuf;
+        } else {
+            picturesPathBase = allManufacturersFolder + "/" + manufacturer;
+        }
         createManufacturerFolder(picturesPathBase);
         String picturesPath = picturesPathBase + "/" + imageFile;
 

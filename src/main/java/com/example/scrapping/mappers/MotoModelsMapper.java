@@ -1,5 +1,6 @@
 package com.example.scrapping.mappers;
 
+import com.example.scrapping.Constants.Constants;
 import com.example.scrapping.dto.Manufacturer;
 import com.example.scrapping.dto.ModelOfManuf;
 import com.example.scrapping.dto.MotoModelDTO;
@@ -10,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -44,7 +47,7 @@ public class MotoModelsMapper {
         //   make
         motoModelDTO.setMake(manufacturer.getName());
         //   model
-        motoModelDTO.setModel(modelOfManuf.getName().replaceAll("'", "\\\\'"));
+        motoModelDTO.setModel(formatModelName(modelOfManuf));
         //   year
         motoModelDTO.setStartYear(Integer.parseInt(getSpecValue("year")));
         if (motoModelDTO.getStartYear() == 0) {
@@ -62,7 +65,7 @@ public class MotoModelsMapper {
 
         if (listOfSpecName.size() > 0) {
             //   engine
-            motoModelDTO.setEngine(getSpecValue("engine").replaceAll("'","\\\\'"));
+            motoModelDTO.setEngine(getSpecValue("engine").replaceAll("'", "\\\\'"));
             if (containsSpec && motoModelDTO.getEngine().equals("0"))
                 logError("engine");
             //   capacity
@@ -71,6 +74,7 @@ public class MotoModelsMapper {
                 logError("capacity");
             //   power
             motoModelDTO.setPower(Double.parseDouble(getSpecValue("power")));
+            if (Constants.MISSING_POWER_LIST.contains(motoModelDTO.getUrl())) containsSpec = false;
             if (containsSpec && motoModelDTO.getPower() == 0)
                 logError("power");
             //   clutch
@@ -79,6 +83,7 @@ public class MotoModelsMapper {
                 logError("clutch");
             //   torque
             motoModelDTO.setTorque(Double.parseDouble(getSpecValue("torque")));
+            if (Constants.MISSING_TORQUE_LIST.contains(motoModelDTO.getUrl())) containsSpec = false;
             if (containsSpec && motoModelDTO.getTorque() == 0)
                 logError("torque");
             //   abs
@@ -93,10 +98,12 @@ public class MotoModelsMapper {
                 logError("drive");
             //   seat_height
             motoModelDTO.setSeatHeight(Double.parseDouble(getSpecValue("seat")));
+            if (Constants.MISSING_SEAT_LIST.contains(motoModelDTO.getUrl())) containsSpec = false;
             if (containsSpec && motoModelDTO.getSeatHeight() == 0)
                 logError("seat");
             //   dry_weight
             motoModelDTO.setDryWeight(Double.parseDouble(getSpecValue("dry")));
+            if (Constants.MISSING_WEIGHT_LIST.contains(motoModelDTO.getUrl())) containsSpec = false;
             if (containsSpec && motoModelDTO.getDryWeight() == 0)
                 logError("dry");
             //   wet_weight
@@ -104,6 +111,7 @@ public class MotoModelsMapper {
             if (motoModelDTO.getDryWeight() == 0 && motoModelDTO.getWetWeight() == 0) {
                 motoModelDTO.setDryWeight(Double.parseDouble(getSpecValue("weight")));
             }
+            if (Constants.MISSING_WEIGHT_LIST.contains(motoModelDTO.getUrl())) containsSpec = false;
             if (containsSpec && motoModelDTO.getWetWeight() == 0 && motoModelDTO.getDryWeight() == 0)
                 logError("wet");
             //   fuel_capacity
@@ -115,6 +123,7 @@ public class MotoModelsMapper {
                 logError("fuel capacity");
             //   reserve
             motoModelDTO.setReserve(Double.parseDouble(getSpecValue("reserve")));
+            if (Constants.MISSING_RESERVE_LIST.contains(motoModelDTO.getUrl())) containsSpec = false;
             if (containsSpec && motoModelDTO.getReserve() == 0)
                 logError("reserve");
             //   consumption
@@ -127,10 +136,64 @@ public class MotoModelsMapper {
                 logError("cooling");
             //   top_speed
             motoModelDTO.setTopSpeed(Double.parseDouble(getSpecValue("speed")));
+            if (Constants.MISSING_SPEED_LIST.contains(motoModelDTO.getUrl())) containsSpec = false;
             if (containsSpec && motoModelDTO.getTopSpeed() == 0)
                 logError("speed");
+        } else {
+            motoModelDTO.setEngine(Constants.EXCEPTION_NO_FIELDS);
         }
-        resetMapper();
+        resetMapper(false);
+        return motoModelDTO;
+    }
+
+    private String formatModelName(ModelOfManuf modelOfManuf) {
+        StringBuilder result = new StringBuilder();
+        String preformat = modelOfManuf.getName().trim()
+                .replaceAll("'", "\\\\'")
+                .replaceAll("\n", "")
+                .replaceAll("\t", "");
+
+        boolean isPreviousSpace = false;
+        for (Character c : preformat.toCharArray()) {
+            if (!c.equals(' ')) {
+                result.append(c);
+                isPreviousSpace = false;
+            } else {
+                if (!isPreviousSpace) {
+                    result.append(c);
+                }
+                isPreviousSpace = true;
+            }
+        }
+
+        return result.toString();
+    }
+
+    public MotoModelDTO mapMotoModelWithoutTable24(Manufacturer manufacturer, ModelOfManuf modelOfManuf) {
+        this.manufacturer = manufacturer;
+        this.modelOfManuf = modelOfManuf;
+        this.modelProductionYears = modelOfManuf.getProductionYears();
+        this.erroneous = false;
+
+        MotoModelDTO motoModelDTO = new MotoModelDTO();
+//        String modelName = modelOfManuf.getName();
+
+        //   make
+        motoModelDTO.setMake(manufacturer.getName());
+        //   model
+        motoModelDTO.setModel(modelOfManuf.getName().replaceAll("'", "\\\\'"));
+        //   year
+        motoModelDTO.setStartYear(Integer.parseInt(formatYear(modelOfManuf.getProductionYears())));
+        //   end_year
+        motoModelDTO.setEndYear(Integer.parseInt(endYear));
+        if (motoModelDTO.getStartYear() == 0 || motoModelDTO.getEndYear() == 0) {
+            logError("year");
+        }
+        //   url
+        motoModelDTO.setUrl(modelOfManuf.getUrl());
+
+        motoModelDTO.setEngine(Constants.EXCEPTION_TABLE_24_MISSING);
+        resetMapper(true);
         return motoModelDTO;
     }
 
@@ -156,7 +219,7 @@ public class MotoModelsMapper {
         String result = "0";
         for (int i = 0; i < listOfSpecName.size(); i++) {
             String nameOfSpecAtI = listOfSpecName.get(i).toLowerCase();
-            String valueOfSpecAtI = listOfSpecValue.get(i);
+            String valueOfSpecAtI = listOfSpecValue.get(i).replaceAll("'", "\\\\'");
             if (nameOfSpecAtI.equals(specName)) {                          // EQUALS
                 containsSpec = true;
                 if (specName.equals("year")) {
@@ -214,16 +277,22 @@ public class MotoModelsMapper {
                     result = formatMetricUnit(valueOfSpecAtI, "kg");
                     break;
                 }
+                if (specName.equals("power")) {
+                    result = formatMetricUnit(valueOfSpecAtI, "kw");
+                    result = result.equals("0") ? formatMetricUnit(valueOfSpecAtI, "ps") : result;
+                    break;
+                }
             } else if (nameOfSpecAtI.contains(specName)) {                   // CONTAINS
                 boolean itExistsButItsEmpty = valueOfSpecAtI.trim().toLowerCase().contains("n/a")
                         || valueOfSpecAtI.trim().toLowerCase().contains("na")
                         || valueOfSpecAtI.trim().toLowerCase().contains("n.a")
-                        || valueOfSpecAtI.trim().replaceAll(" ","").replaceAll("\n","").isEmpty();
+                        || valueOfSpecAtI.trim().replaceAll(" ", "").replaceAll("\n", "").isEmpty();
                 if (nameOfSpecAtI.contains("power") && !nameOfSpecAtI.contains("weight") && !nameOfSpecAtI.contains("rear")
                         && !nameOfSpecAtI.contains("transmission") && !nameOfSpecAtI.contains("pack")) {
                     if (itExistsButItsEmpty) break;
                     containsSpec = true;
                     result = formatMetricUnit(valueOfSpecAtI, "kw");
+                    result = result.equals("0") ? formatMetricUnit(valueOfSpecAtI, "ps") : result;
                     break;
                 }
                 if ((specName.equals("drive") && nameOfSpecAtI.contains("final")) || specName.equals("cooling")) {
@@ -234,7 +303,7 @@ public class MotoModelsMapper {
                 if (specName.equals("torque")) {
                     if (itExistsButItsEmpty) break;
                     containsSpec = true;
-                    result = formatMetricUnit(valueOfSpecAtI, "nm");
+                    result = formatMetricUnit(valueOfSpecAtI.toLowerCase().replaceAll("-", ""), "nm");
                     break;
                 }
                 if (nameOfSpecAtI.contains("dry") || nameOfSpecAtI.contains("wet")) {
@@ -298,14 +367,22 @@ public class MotoModelsMapper {
         return result;
     }
 
-    private void resetMapper() {
-        this.listOfSpecName.clear();
-        this.listOfSpecValue.clear();
-        this.manufacturer = null;
-        this.modelProductionYears = null;
-        this.endYear = "0";
-        this.containsSpec = false;
-        this.modelOfManuf = null;
+    private void resetMapper(boolean isTable24) {
+        if (isTable24) {
+            this.manufacturer = null;
+            this.modelProductionYears = null;
+            this.endYear = "0";
+            this.containsSpec = false;
+            this.modelOfManuf = null;
+        } else {
+            this.listOfSpecName.clear();
+            this.listOfSpecValue.clear();
+            this.manufacturer = null;
+            this.modelProductionYears = null;
+            this.endYear = "0";
+            this.containsSpec = false;
+            this.modelOfManuf = null;
+        }
     }
 
     private String getConsumption(String rawSpecValue) {
@@ -320,6 +397,18 @@ public class MotoModelsMapper {
                 result = getNumberFromBeginningOrEndOfString(preFormat, false);
                 DecimalFormat df = new DecimalFormat("#.#");
                 double lPer100km = 235.21 / Double.parseDouble(result);
+                result = df.format(lPer100km);
+            } else if (rawSpecValue.toLowerCase().contains("mp")) {
+                preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("mp")).trim().replaceAll(" ", "");
+                result = getNumberFromBeginningOrEndOfString(preFormat, false);
+                DecimalFormat df = new DecimalFormat("#.#");
+                double lPer100km = 235.21 / Double.parseDouble(result);
+                result = df.format(lPer100km);
+            } else if (rawSpecValue.toLowerCase().contains("lm")) {
+                preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("lm")).trim().replaceAll(" ", "");
+                result = getNumberFromBeginningOrEndOfString(preFormat, false);
+                DecimalFormat df = new DecimalFormat("#.#");
+                double lPer100km = 100 / Double.parseDouble(result);
                 result = df.format(lPer100km);
             } else if (rawSpecValue.toLowerCase().contains("kwh")) {
                 result = getNumberFromBeginningOrEndOfString(rawSpecValue, false);
@@ -365,6 +454,11 @@ public class MotoModelsMapper {
                 result = String.valueOf(df.format(0.453592 * lb));
             } else if (unit.equals("kph") && rawSpecValue.contains("mph")) {
                 String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("mph")).trim().replaceAll(" ", "");
+                double mph = Double.parseDouble(getNumberFromBeginningOrEndOfString(preFormat, false));
+                DecimalFormat df = new DecimalFormat("#");
+                result = String.valueOf(df.format(1.609 * mph));
+            } else if (unit.equals("kph") && rawSpecValue.contains("mp")) {
+                String preFormat = rawSpecValue.substring(0, rawSpecValue.toLowerCase().indexOf("mp")).trim().replaceAll(" ", "");
                 double mph = Double.parseDouble(getNumberFromBeginningOrEndOfString(preFormat, false));
                 DecimalFormat df = new DecimalFormat("#");
                 result = String.valueOf(df.format(1.609 * mph));
@@ -414,7 +508,7 @@ public class MotoModelsMapper {
         String result = "0";
         String yearsToBeFormatted = year.isEmpty() ? modelProductionYears : year;
         for (char c : year.toCharArray()) {
-            if (Character.isLetter(c) || c == '/' || c == ':' ) {
+            if (Character.isLetter(c) || c == '/' || c == ':') {
                 yearsToBeFormatted = modelProductionYears;
                 break;
             }

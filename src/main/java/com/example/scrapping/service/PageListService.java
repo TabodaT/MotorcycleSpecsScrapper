@@ -32,19 +32,24 @@ public class PageListService {
     @Autowired
     ModelsToDataBaseService modelsToDataBaseService;
     LogsWriterSingletonService logsWriterSingletonService;
-    private List<String> ignoreManufacturersList = new ArrayList<>(Arrays.asList("AJP","AJS","Aprilia"));
+    private List<String> ignoreManufacturersList = new ArrayList<>(Arrays.asList(
+            "AJP", "AJS", "Aprilia", "Ariel", "Benelli", "Beta", "Bajaj", "Bimota", "BMW", "Brough Superior", "BRP Cam-Am", "BSA"
+            , "Avinton / Wakan", "Buell / EBR", "Bultaco", "Cagiva", "Campagna", "CCM", "CF Moto", "Combat Motors", "Derbi"
+    ));
 
     // START HERE
     public void startScrapping() {
         try {
+            System.out.println("Scrapping has started");
 
-//            scrapeOneModelByUrl("BMW","HP4 Race",
-//                    "https://www.motorcyclespecs.co.za/model/bmw/bmw-hp4-race.html","2018");
+//            scrapeOneModelByUrl("XTR / Radical","Ducati Monster Pata Negra by XTR Pepo",
+//                    "https://www.motorcyclespecs.co.za/model/XTR_Radical/Ducati_Monster_Pata_Negra.htm","2003");
 
 //            modelsToDataBaseService.existsInDB("test");
 
             listOfManufacturers = getListOfManufacturers();
             for (Manufacturer manufacturer : listOfManufacturers) {
+                if (manufacturer.getUrl().equals("https://www.motorcyclespecs.co.za/bikes/video_clips.htm")) break;
                 getModelsOfManuf(manufacturer);
                 getModelsDetailsAndAddToDB(manufacturer);
                 logNotInsertedMotos(manufacturer);
@@ -53,12 +58,13 @@ public class PageListService {
         } catch (Exception e) {
             log.error("Something is wrong: " + e);
         }
+        System.out.println("Scrapping has ended");
 
     }
 
-    private void scrapeOneModelByUrl(String manufName, String modelName, String url, String productionYears){
-        Manufacturer manuf = new Manufacturer(manufName,"ScrapingOne");
-        ModelOfManuf model = new ModelOfManuf(modelName,url,productionYears,1);
+    private void scrapeOneModelByUrl(String manufName, String modelName, String url, String productionYears) {
+        Manufacturer manuf = new Manufacturer(manufName, "ScrapingOne");
+        ModelOfManuf model = new ModelOfManuf(modelName, url, productionYears, 1);
         if (!modelsToDataBaseService.existsInDB(url)) {
             manuf.addModel(model);
             getModelsDetailsAndAddToDB(manuf);
@@ -97,7 +103,8 @@ public class PageListService {
             String error = "Some error while getting models details " + manufacturer.getName() + " " + e;
             try {
                 logsWriterSingletonService.logError(error);
-            } catch (Exception ignored){}
+            } catch (Exception ignored) {
+            }
             System.out.println(error);
         }
     }
@@ -127,12 +134,14 @@ public class PageListService {
                 if (anchor != null) {
                     String modelName = anchor.getTextContent();
                     modelName = modelName.replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "").replaceAll(" ", "").trim();
-                    if (modelName.isEmpty()) continue;
-//                    if (listOfLinksToIgnore.contains(modelName)) continue; // TODO remove
+                    if (modelName.isEmpty() || listOfLinksToIgnore.contains(modelName)) continue;
 
                     String productionYears = "";
                     String semiLink = anchor.getAttribute("href");
-                    String url = composeUrlOfModel(manufacturer, semiLink);
+                    String url = composeUrlOfModel(manufacturer, semiLink).replaceAll("'", "\\\\'");
+
+                    // check if the link needs to be ignored
+                    if (Constants.MODEL_LINKS_TO_INGNORE_LIST.contains(url)) continue;
 
                     // check if model already exists in DB
                     if (modelsToDataBaseService.existsInDB(url)) continue;
@@ -149,9 +158,9 @@ public class PageListService {
                         if (cellNr > 2) break;
                         cellNr++;
                     }
-                    if (productionYears.isEmpty()) continue;
+                    if (productionYears.isEmpty()) productionYears = "1111";
 
-                    ModelOfManuf modelOfManuf = new ModelOfManuf(modelName, url, productionYears, pageCounter-1);
+                    ModelOfManuf modelOfManuf = new ModelOfManuf(modelName, url, productionYears, pageCounter - 1);
                     manufacturer.addModel(modelOfManuf);
 
 //                    if (modelOfManuf.getUrl().isEmpty()) continue;
@@ -186,7 +195,7 @@ public class PageListService {
         List<Manufacturer> resultListOfManufacturers = new ArrayList<>();
         HtmlPage page;
 
-        try(WebClient client = new WebClient()) {
+        try (WebClient client = new WebClient()) {
             client.getOptions().setCssEnabled(false);
             client.getOptions().setJavaScriptEnabled(false);
             page = client.getPage(Constants.MOTORCYCLESPECS_CO_ZA);
@@ -208,7 +217,7 @@ public class PageListService {
 
             String manufName = element.getTextContent();
             if (manufName.isBlank() ||
-                    ignoreManufacturersList.contains(manufName) || // to be deleted TODO
+//                    ignoreManufacturersList.contains(manufName) || // to be commented TODO
                     manufName.contains("Complete Manufacturer")) continue;
 
             Manufacturer manufacturer = new Manufacturer(manufName, composeUrlOfManuf(semiLink));
@@ -219,25 +228,10 @@ public class PageListService {
 
     private String composeUrlOfModel(Manufacturer manufacturer, String semiLink) {
         String result;
-        String manufUrl;
         String linkHalf2;
         String linkHalf1;
-//        if (listOfManufWUrlRacers.contains(manufacturer.getName().toLowerCase())) {
         linkHalf1 = Constants.MOTORCYCLESPECS_CO_ZA;
         linkHalf2 = semiLink.substring(semiLink.indexOf("/") + 1);
-//            result = linkHalf1 + linkHalf2;
-//            return result;
-//        }
-//        manufUrl = manufacturer.getUrl();
-//        linkHalf2 = semiLink.substring(semiLink.lastIndexOf("/") + 1);
-//        linkHalf1 = manufUrl.substring(0, manufUrl.lastIndexOf(".")) + "/";
-
-//        if (listOfManufWUrlModel.contains(manufacturer.getName().toLowerCase())) {
-//            manufUrl = manufacturer.getUrl(); // weren't here
-//            linkHalf2 = semiLink.substring(semiLink.lastIndexOf("/") + 1); // weren't here
-//            linkHalf1 = manufUrl.substring(0, manufUrl.lastIndexOf(".")) + "/"; // weren't here
-//            linkHalf1 = linkHalf1.replaceFirst("/bikes/", "/model/");
-//        }
         result = linkHalf1 + linkHalf2;
         return result;
     }
