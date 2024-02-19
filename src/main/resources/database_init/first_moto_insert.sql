@@ -1,34 +1,42 @@
 USE `motorcycles`;
 
-select * from moto_models
--- where model = 'F 750GS'
-where make = 'BMW' and start_year = 2020
-order by model asc
-select count(*) from moto_models 
-where make = 'Bajaj'
+select * from moto_models where start_year >2024 order by model asc
+
+select id, make, model, engine, capacity, power, url from moto_models where capacity = 0 and engine != 'NO_FIELDS' and engine != 'TABLE_24_MISSING'
+select id, make, model, engine, capacity, power, url from moto_models where capacity = 0
+select * from moto_models where make = 'Aprilia'
+select count(*) from moto_models where capacity = 0
+
+delete from moto_models where capacity = 0
+
+update moto_models set capacity = '600' where id = 12409
+
+select count(*) from moto_models where make = 'Blast'
+select * from moto_models where make = 'Zero'
+select distinct make from moto_models
+
+select * from moto_models where url = 'https://www.motorcyclespecs.co.za/model/AJP/AJP_PR7.htm'
+select * from moto_models where id = 11215
+delete from moto_models where url = 'https://www.motorcyclespecs.co.za/model/AJP/AJP_PR7.htm'
 
 insert into 
 moto_models(make,year,end_year,model,capacity,power) 
 values ('BMW',2010,2012,'R 1200gs','1200',81);
 insert into moto_models(make,model,start_year,end_year,engine,capacity,power,clutch,torque,abs,transmission,final_drive,seat_height,dry_weight,wet_weight,fuel_capacity,reserve,consumption,cooling_system,top_speed,url,image) values('test','test',1,1,'test',1,1,'test',1,true,1,'test',1,1,1,1.0,1,1.0,'test',1,'test','test')
 
-delete from moto_models where id in (212)
+delete from moto_models where id in (10510)
 SET SQL_SAFE_UPDATES=0
-delete from moto_models where cooling_system = '0'
-
-select id from moto_models where cooling = '0'
-
+delete from moto_models where capacity = 0 and engine != 'NO_FIELDS'
 
 select count(*) from moto_models where url = 'test';
 where year <= 2012 and end_year >= 2012
 
-update moto_models
-set capacity = '1170'
-where id = 1 
+
 
 delete from moto_models where year >= 0; 
 where id = 1;
 
+alter table moto_models modify cooling_system varchar(500)
 
 ------------------
 SELECT * from user

@@ -93,12 +93,19 @@ v	- set production years to "1111" to all models without production years
 v	- create a MODEL_LINKS_TO_INGNORE_LIST for pages that don't work
 v	- 1/76: Blast (2007-09) https://www.motorcyclespecs.co.za/model/buell/buell_blast%2007.htm Some error while getting models details Buell / EBR java.nio.file.InvalidPathException: Trailin
 v	- erase all blank pages
+v	- add in MODEL_LINKS_TO_INGNORE_LIST all links with errors
 	- fix all inserted with no EXCEPTION table in engine, and with capacity 0
-		- all that contain in spec field either "battery" or "charging" should be marked as "ELECTRIC" in engine and '-1' in capacity
-		- if capacity == 0 and number >= 99 -> set as capacity
+x		- all that contain in spec field "charging" should be marked '-1' in capacity
+x		- if capacity == 0 and number >= 99 -> set as capacity
 		- search in model txt (<p> elements): 'XXcc ' and extract number
 		- count(*) where capacity = 0 == 1255
-	- add in MODEL_LINKS_TO_INGNORE_LIST all links with errors
+	- fix this link where table exists but doesn't get data : https://www.motorcyclespecs.co.za/model/AJP/AJP_PR7.htm
+		- table24 doesn't exist, but there is: table5, table47, table33, table30, table28...
+		- make special case for aprilia to ignore table24
+		- why there are no Zero motos???
+		- https://stackoverflow.com/questions/7115022/how-do-i-enumerate-all-of-the-html-ids-in-a-document-with-javascript
+		- https://stackoverflow.com/questions/31439549/is-nodelist-an-array-or-a-list-or-something-else
+	- why there are no Zero motos???
 	- fix moto with year > 9999
 	- handle ignoreURLs list
 

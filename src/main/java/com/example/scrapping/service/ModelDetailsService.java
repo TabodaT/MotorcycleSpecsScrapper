@@ -7,9 +7,7 @@ import com.example.scrapping.dto.MotoModelDTO;
 import com.example.scrapping.mappers.MotoModelsMapper;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
+import com.gargoylesoftware.htmlunit.html.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,13 +33,16 @@ public class ModelDetailsService {
     private String imageFile = "";
     private final LogsWriterSingletonService logsWriterSingletonService = LogsWriterSingletonService.getInstance();
     private final MotoModelsMapper motoModelsMapper = new MotoModelsMapper();
-    private HtmlElement table24;
+    private HtmlElement specsTable;
     private HtmlPage page;
     private MotoModelDTO motoModelDTO;
 
     private List<String> ignoreURLs = new ArrayList<>(Arrays.asList(
                 "https://www.motorcyclespecs.co.za/H-D.htm",
                 "https://www.motorcyclespecs.co.za/model/Honda/honda_rc51_sp2_nicky_hayden.html"
+            ));
+    private List<String> tablesToLookFor = new ArrayList<>(Arrays.asList(
+                "table24","table28","table5","table47","table33","table30","table36"
             ));
 
     public ModelDetailsService() {
@@ -57,7 +58,7 @@ public class ModelDetailsService {
             if (ignoreURLs.contains(modelOfManuf.getUrl())) continue; // to be deleted todo
             printModelBeingScrapped(modelsCounter,nrOfModels,modelOfManuf);
             modelsCounter++;
-            boolean hasTable24 = true;
+            boolean hasSpecsTable = true;
 
             try(WebClient client = new WebClient()) {
                 client.getOptions().setCssEnabled(false);
@@ -68,17 +69,24 @@ public class ModelDetailsService {
                 continue;
             }
 
-            try {
-                table24 = page.getHtmlElementById("table24");
-            } catch (Exception e) {
-//                logErrorInGetModel(manufacturer, modelOfManuf, "table24 not found: page=", e); // todo uncomment this and add motorcycles
-                hasTable24 = false;
+            for (String tableName : tablesToLookFor){
+                try {
+                    specsTable = page.getHtmlElementById(tableName);
+                    if (checkIfIsCorrectTable(specsTable)){
+                        getDataFromTable(specsTable);
+                    }
+                } catch (Exception e) {
+//                    logErrorInGetModel(manufacturer, modelOfManuf, "table24 not found: page=", e); // todo uncomment this and add motorcycles
+                    hasSpecsTable = false;
+                }
+
             }
 
-            if (hasTable24) {
-                getImageOfTheModel(table24, manufacturer.getName(), modelOfManuf.getName());
+
+            if (hasSpecsTable) {
+                getImageOfTheModel(specsTable, manufacturer.getName(), modelOfManuf.getName());
                 savePicturesOfModels(imageLink, manufacturer.getName(), modelOfManuf.getName());
-                getDataFromTable(table24);
+//                getDataFromTable(specsTable);
 
                 printScrapedTable(); // to be deleted
 
@@ -96,7 +104,6 @@ public class ModelDetailsService {
                     continue;
                 }
             }
-//            System.out.println(motoModelDTO); // to be deleted
 
             if (!motoModelsMapper.isErroneous() && !motoModelDTO.getModel().isEmpty()) {
                 boolean wasInserted = false;
@@ -121,7 +128,37 @@ public class ModelDetailsService {
             }
             clearData();
         }
-//        listOfSpecName.forEach(System.out::println); // to be deleted
+    }
+
+    private boolean checkIfIsCorrectTable(HtmlElement table) {
+        boolean result = false;
+//        boolean hasMakeModel = false;
+//        boolean hasCapacity = false;
+        List<HtmlElement> rows = table.getByXPath(".//tr");
+        for (HtmlElement row : rows) {
+            List<HtmlTableCell> cells = row.getByXPath(".//td");
+            if (cells.size() == 2) result = true;
+//            if (cells.size() == 2) {
+//                int cellNr = 1;
+//                for (HtmlElement cell : cells) {
+//                    String cellText = cell.getTextContent().replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "").replaceAll(" ", "").trim();
+//                    if (cellNr == 1 && cellText.toLowerCase().contains("make model")) {
+//                        hasMakeModel = true;
+//                        continue;
+//                    }
+//                    if (cellNr == 1 && cellText.toLowerCase().contains("capacity")) {
+//                        hasCapacity = true;
+//                        continue;
+//                    }
+//                    if (hasMakeModel && hasCapacity){
+//                        result = true;
+//                        break;
+//                    }
+//                    cellNr++;
+//                }
+//            }
+        }
+        return result;
     }
 
     private void printModelBeingScrapped(int modelsCounter, int nrOfModels, ModelOfManuf modelOfManuf) {
@@ -154,7 +191,7 @@ public class ModelDetailsService {
         listOfSpecValue.clear();
         imageLink = "";
         imageFile = "";
-        table24 = null;
+        specsTable = null;
         page = null;
         motoModelDTO = null;
     }
@@ -262,16 +299,12 @@ public class ModelDetailsService {
             if (cells.size() == 2) {
                 int cellNr = 1;
                 for (HtmlElement cell : cells) {
-//                    if (cell.getTextContent().contains("Lubrication")) {
-//                        System.out.println("Here!!"); // to be deleted
-//                    }
                     String cellText = cell.getTextContent().replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "").replaceAll(" ", "").trim();
                     if (cellNr == 1) {
                         listOfSpecName.add(cellText);
                     } else {
                         listOfSpecValue.add(cellText);
                     }
-//                        System.out.println(cell.getTextContent());
                     cellNr++;
                 }
             }

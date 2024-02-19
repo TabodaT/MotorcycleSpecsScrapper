@@ -30,6 +30,7 @@ public class MotoModelsMapper {
     private boolean containsSpec;
     private ModelOfManuf modelOfManuf;
     private boolean erroneous;
+    private boolean isElectric;
     private final LogsWriterSingletonService logsWriterSingletonService = LogsWriterSingletonService.getInstance();
 
     public MotoModelDTO mapMotoModel(List<String> listOfSpecName, List<String> listOfSpecValue,
@@ -40,6 +41,7 @@ public class MotoModelsMapper {
         this.modelOfManuf = modelOfManuf;
         this.modelProductionYears = modelOfManuf.getProductionYears();
         this.erroneous = false;
+        this.isElectric = false;
 
         MotoModelDTO motoModelDTO = new MotoModelDTO();
 //        String modelName = modelOfManuf.getName();
@@ -142,8 +144,23 @@ public class MotoModelsMapper {
         } else {
             motoModelDTO.setEngine(Constants.EXCEPTION_NO_FIELDS);
         }
+        if (isElectric) {
+            motoModelDTO.setCapacity(-1);
+        }
+        if (motoModelDTO.getCapacity() == 0) {
+            motoModelDTO.setCapacity(getCapacityFromModelName());
+        }
         resetMapper(false);
         return motoModelDTO;
+    }
+
+    private double getCapacityFromModelName() {
+        double result = 0;
+        String potentialCC = getNumberFromBeginningOrEndOfString(modelOfManuf.getName(), true);
+        if (!potentialCC.isEmpty()) {
+            result = Double.parseDouble(potentialCC) >= 99 ? Double.parseDouble(potentialCC) : 0;
+        }
+        return result;
     }
 
     private String formatModelName(ModelOfManuf modelOfManuf) {
@@ -220,6 +237,9 @@ public class MotoModelsMapper {
         for (int i = 0; i < listOfSpecName.size(); i++) {
             String nameOfSpecAtI = listOfSpecName.get(i).toLowerCase();
             String valueOfSpecAtI = listOfSpecValue.get(i).replaceAll("'", "\\\\'");
+            if (nameOfSpecAtI.contains("charg")) {
+                isElectric = true;
+            }
             if (nameOfSpecAtI.equals(specName)) {                          // EQUALS
                 containsSpec = true;
                 if (specName.equals("year")) {
