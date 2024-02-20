@@ -41,9 +41,10 @@ public class ModelDetailsService {
                 "https://www.motorcyclespecs.co.za/H-D.htm",
                 "https://www.motorcyclespecs.co.za/model/Honda/honda_rc51_sp2_nicky_hayden.html"
             ));
-    private List<String> tablesToLookFor = new ArrayList<>(Arrays.asList(
-                "table24","table28","table5","table47","table33","table30","table36"
-            ));
+
+//    private List<String> tablesToLookFor = new ArrayList<>(Arrays.asList(
+//                "table24","table28","table5","table47","table33","table30","table36"
+//            ));
 
     public ModelDetailsService() {
         this.listOfSpecName = new ArrayList<>();
@@ -69,17 +70,11 @@ public class ModelDetailsService {
                 continue;
             }
 
-            for (String tableName : tablesToLookFor){
-                try {
-                    specsTable = page.getHtmlElementById(tableName);
-                    if (checkIfIsCorrectTable(specsTable)){
-                        getDataFromTable(specsTable);
-                    }
-                } catch (Exception e) {
-//                    logErrorInGetModel(manufacturer, modelOfManuf, "table24 not found: page=", e); // todo uncomment this and add motorcycles
-                    hasSpecsTable = false;
-                }
-
+            try {
+                specsTable = page.getHtmlElementById("table24");
+            } catch (Exception e) {
+//                logErrorInGetModel(manufacturer, modelOfManuf, "table24 not found: page=", e); // todo uncomment this and add motorcycles
+                hasSpecsTable = false;
             }
 
 

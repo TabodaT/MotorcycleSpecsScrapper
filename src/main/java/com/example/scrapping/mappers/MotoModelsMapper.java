@@ -159,6 +159,10 @@ public class MotoModelsMapper {
         String potentialCC = getNumberFromBeginningOrEndOfString(modelOfManuf.getName(), true);
         if (!potentialCC.isEmpty()) {
             result = Double.parseDouble(potentialCC) >= 99 ? Double.parseDouble(potentialCC) : 0;
+            if (result == 0){
+                potentialCC = getNumberFromBeginningOrEndOfString(modelOfManuf.getName(), false);
+                result = Double.parseDouble(potentialCC) >= 99 ? Double.parseDouble(potentialCC) : 0;
+            }
         }
         return result;
     }
@@ -193,7 +197,6 @@ public class MotoModelsMapper {
         this.erroneous = false;
 
         MotoModelDTO motoModelDTO = new MotoModelDTO();
-//        String modelName = modelOfManuf.getName();
 
         //   make
         motoModelDTO.setMake(manufacturer.getName());
@@ -211,6 +214,9 @@ public class MotoModelsMapper {
 
         motoModelDTO.setEngine(Constants.EXCEPTION_TABLE_24_MISSING);
         resetMapper(true);
+        if (motoModelDTO.getCapacity() == 0) {
+            motoModelDTO.setCapacity(getCapacityFromModelName());
+        }
         return motoModelDTO;
     }
 

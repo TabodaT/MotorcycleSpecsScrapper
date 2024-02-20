@@ -41,19 +41,19 @@ public class PageListService {
         try {
             System.out.println("Scrapping has started");
 
-            scrapeOneModelByUrl("AJP","PR7 Adventure",
-                    "https://www.motorcyclespecs.co.za/model/AJP/AJP_PR7.htm","2016");
+//            scrapeOneModelByUrl("AJP","PR7 Adventure",
+//                    "https://www.motorcyclespecs.co.za/model/AJP/AJP_PR7.htm","2016");
 
 //            modelsToDataBaseService.existsInDB("test");
 
-//            listOfManufacturers = getListOfManufacturers();
-//            for (Manufacturer manufacturer : listOfManufacturers) {
-//                if (manufacturer.getUrl().equals("https://www.motorcyclespecs.co.za/bikes/video_clips.htm")) break;
-//                getModelsOfManuf(manufacturer);
-//                getModelsDetailsAndAddToDB(manufacturer);
-//                logNotInsertedMotos(manufacturer);
-//                System.gc();
-//            }
+            listOfManufacturers = getListOfManufacturers();
+            for (Manufacturer manufacturer : listOfManufacturers) {
+                if (manufacturer.getUrl().equals("https://www.motorcyclespecs.co.za/bikes/video_clips.htm")) break;
+                getModelsOfManuf(manufacturer);
+                getModelsDetailsAndAddToDB(manufacturer);
+                logNotInsertedMotos(manufacturer);
+                System.gc();
+            }
         } catch (Exception e) {
             log.error("Something is wrong: " + e);
         }
