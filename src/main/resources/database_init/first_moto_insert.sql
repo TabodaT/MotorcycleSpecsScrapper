@@ -4,7 +4,14 @@ select * from moto_models where start_year >2024 order by model asc
 
 select id, make, model, engine, capacity, power, url from moto_models where capacity = 0 and engine != 'NO_FIELDS' and engine != 'TABLE_24_MISSING'
 select id, make, model, engine, capacity, power, url from moto_models where capacity = 0
-select * from moto_models where make = 'Aprilia'
+select * from moto_models where make = 'BMW' and model = 'K 1600GT'
+select * from moto_models order by id desc
+
+-- insert duplicate
+Insert into moto_models (id,make,model,start_year,end_year,engine,capacity,power,clutch,torque,abs,transmission,final_drive,seat_height,dry_weight,wet_weight,fuel_capacity,reserve,consumption,cooling_system,top_speed,url,image)
+select 13737, make,model,start_year,end_year,engine,capacity,power,clutch,torque,abs,transmission,final_drive,seat_height,dry_weight,wet_weight,fuel_capacity,reserve,consumption,cooling_system,top_speed,url,image
+from moto_models where id = 1279
+
 select count(*) from moto_models where capacity = 0
 
 delete from moto_models where capacity = 0
@@ -15,7 +22,7 @@ select count(*) from moto_models where make = 'Blast'
 select * from moto_models where make = 'Zero'
 select distinct make from moto_models
 
-select * from moto_models where url = 'https://www.motorcyclespecs.co.za/model/AJP/AJP_PR7.htm'
+select * from moto_models where url = 'https://www.motorcyclespecs.co.za/model/beneli/benelli_v4_1000.htm'
 select * from moto_models where id = 11215
 delete from moto_models where url = 'https://www.motorcyclespecs.co.za/model/AJP/AJP_PR7.htm'
 

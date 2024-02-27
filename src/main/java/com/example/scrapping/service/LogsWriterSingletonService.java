@@ -7,7 +7,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 
 public class LogsWriterSingletonService {
-    public LogsWriterSingletonService() {}
+    private LogsWriterSingletonService() {}
     private static LogsWriterSingletonService instance;
 
     public static LogsWriterSingletonService getInstance(){
