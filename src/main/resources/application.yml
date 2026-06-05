@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: motointel
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:motointel}
+    username: ${DB_USER:motointel}
+    password: ${DB_PASSWORD:motointel_local_dev}
+    hikari:
+      connection-timeout: 30000
+      initialization-fail-timeout: 60000
+      maximum-pool-size: 10
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        format_sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    connect-retries: 10
+    connect-retries-interval: 5
+    placeholder-replacement: false
+  jackson:
+    default-property-inclusion: always
+    serialization:
+      write-dates-as-timestamps: false
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  version: 1.0.0
+  storage:
+    root: ${STORAGE_ROOT:./data/storage}
+  scraper:
+    user-agent: ${SCRAPER_USER_AGENT:MotoIntelBot/1.0 (+local)}
+    http-timeout-ms: ${HTTP_TIMEOUT_MS:15000}
+    rate-limit-rps: ${CATALOG_RATE_LIMIT_RPS:1}
+  listing:
+    removed-threshold-n: ${LISTING_REMOVED_THRESHOLD_N:2}
+    likely-sold-days-x: ${LISTING_LIKELY_SOLD_DAYS_X:7}
+  scheduler:
+    default-cron: ${SCHEDULER_DEFAULT_INTERVAL_CRON:0 0 3 * * *}

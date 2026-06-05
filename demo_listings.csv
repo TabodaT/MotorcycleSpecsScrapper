@@ -1,0 +1,9 @@
+source,url,title,price,currency,observed_at,description,location,posted_date,seller_type,external_id,mileage_km,image_url
+OLX,https://example.test/olx/demo-001,Honda CBR600RR 2009 excellent,6700,EUR,2024-05-01,Clean title low mileage,Bucuresti,2024-04-28,private,demo-001,24000,
+OLX,https://example.test/olx/demo-002,Yamaha MT-07 2020 ABS,7100,EUR,2024-05-02,Single owner,Cluj,2024-04-30,dealer,demo-002,15000,
+Autovit,https://example.test/autovit/demo-003,Suzuki GSX-R600 2012,6100,EUR,2024-05-03,New chain and sprockets,Timisoara,2024-05-01,private,demo-003,33000,
+OLX,https://example.test/olx/demo-004,Kawasaki Z900 2021,9300,EUR,2024-05-04,Akrapovic full system,Iasi,2024-05-02,private,demo-004,8000,
+Autovit,https://example.test/autovit/demo-005,BMW R 1250 GS 2022 Adventure,18900,EUR,2024-05-05,Fully loaded,Brasov,2024-05-03,dealer,demo-005,12000,
+OLX,https://example.test/olx/demo-006,Yamaha R6 track prepared,7800,EUR,2024-05-06,Race fairings included,Constanta,2024-05-04,private,demo-006,19000,
+OLX,https://example.test/olx/demo-007,600cc supersport bargain,3200,EUR,2024-05-07,Project bike sold as is,Bucuresti,2024-05-05,private,demo-007,52000,
+OLX,https://example.test/olx/demo-008,Electric scooter 3000W,1500,EUR,2024-05-08,City commuter electric,Cluj,2024-05-06,private,demo-008,2000,

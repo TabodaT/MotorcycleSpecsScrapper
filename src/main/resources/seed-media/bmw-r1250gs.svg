@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250">
+  <rect width="400" height="250" fill="#1c1c1c"/>
+  <rect x="10" y="10" width="380" height="230" fill="none" stroke="#6ca0dc" stroke-width="3"/>
+  <text x="200" y="120" font-family="Arial, sans-serif" font-size="34" fill="#6ca0dc" text-anchor="middle" font-weight="bold">BMW</text>
+  <text x="200" y="160" font-family="Arial, sans-serif" font-size="26" fill="#ffffff" text-anchor="middle">R 1250 GS</text>
+</svg>

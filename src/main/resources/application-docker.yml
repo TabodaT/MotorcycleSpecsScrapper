@@ -1,0 +1,5 @@
+# Active when SPRING_PROFILES_ACTIVE=docker (set by docker-compose).
+# Inside the compose network the app reaches Postgres at db:5432 (not the host port).
+spring:
+  datasource:
+    url: jdbc:postgresql://db:5432/${DB_NAME:motointel}
