@@ -59,7 +59,7 @@ export function DashboardPage() {
                     <tbody>
                       {data.latestJobs.map(job => (
                         <tr key={job.id}>
-                          <td className="mono truncate" title={job.id}>{job.id.slice(0, 8)}…</td>
+                          <td className="mono truncate" title={String(job.id)}>{job.id}</td>
                           <td>{job.type}</td>
                           <td>{job.source ?? '—'}</td>
                           <td><StatusBadge value={job.status} type="job" /></td>

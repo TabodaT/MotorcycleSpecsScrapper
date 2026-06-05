@@ -113,8 +113,26 @@ htmlunit | mysql-connector | jooq | liquibase (pom.xml)                    -> no
 legacy package com.example                                                 -> not present
 ```
 
-## 8. Optional (not run)
+## 8. Headless browser pass (§11.6) — all pages render
 
-Headless Playwright screenshot pass over the 7 pages was **not run** (optional per §11.6); the SPA is
-confirmed served at `/` with working deep-link fallback, and the frontend build + `tsc` are green.
-The pages can be viewed live at http://localhost:18080.
+A headless Chromium pass (Playwright) loaded every route and asserted the React tree mounted with
+**zero console/page errors**. Screenshots saved under `verification/screenshots/`.
+
+```
+OK dashboard      HTTP 200   OK catalog      HTTP 200   OK listings      HTTP 200
+OK sources        HTTP 200   OK import       HTTP 200   OK match-review  HTTP 200
+OK analytics      HTTP 200
+RESULT: ALL 7 PAGES RENDERED CLEAN
+OK model-detail   HTTP 200   OK listing-detail HTTP 200   OK listing-detail (price chart) HTTP 200
+DETAIL: ALL DETAIL PAGES CLEAN
+```
+
+### Two runtime issues found via the browser pass and fixed
+1. **Blank page** — the SPA called `job.id.slice(...)` but the API returns numeric ids; once a job
+   existed the Dashboard threw during render and (no error boundary) React unmounted the whole tree.
+   Fixed by rendering the numeric id directly (3 sites) + added `favicon.svg`.
+2. **Catalog 500** — the models-list JPQL hit `lower(bytea)` when the search term was null (Postgres
+   couldn't type the null bind inside `LOWER(CONCAT(...))`). Fixed by binding a pre-lowercased
+   `%term%` pattern directly to `LIKE` so the type is inferred from the column.
+
+After the fixes, the full 7-page + detail-page pass is clean (above).

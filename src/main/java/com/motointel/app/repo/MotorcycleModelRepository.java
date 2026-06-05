@@ -16,15 +16,19 @@ public interface MotorcycleModelRepository extends JpaRepository<MotorcycleModel
 
     Optional<MotorcycleModel> findByManufacturerIdAndNormalizedName(Long manufacturerId, String normalizedName);
 
+    /**
+     * {@code like} must be a pre-lowercased {@code %term%} pattern (or null for no text filter).
+     * Binding it directly to LIKE lets Postgres infer the text type from the column, avoiding the
+     * {@code lower(bytea)} type-inference error that a null param inside LOWER(CONCAT(...)) triggers.
+     */
     @Query("""
             SELECT m FROM MotorcycleModel m
             WHERE (:manufacturerId IS NULL OR m.manufacturerId = :manufacturerId)
-              AND (:q IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :q, '%'))
-                   OR m.normalizedName LIKE LOWER(CONCAT('%', :q, '%')))
+              AND (:like IS NULL OR LOWER(m.name) LIKE :like OR LOWER(m.normalizedName) LIKE :like)
             ORDER BY m.name ASC
             """)
     Page<MotorcycleModel> search(@Param("manufacturerId") Long manufacturerId,
-                                 @Param("q") String q, Pageable pageable);
+                                 @Param("like") String like, Pageable pageable);
 
     @Query("""
             SELECT m FROM MotorcycleModel m

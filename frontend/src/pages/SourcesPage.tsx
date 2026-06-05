@@ -23,7 +23,7 @@ function JobDetailPanel({ jobId, onClose }: { jobId: string; onClose: () => void
   return (
     <div className="card" style={{ marginTop: 20 }}>
       <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <span>Job Detail: {job.id.slice(0, 12)}…</span>
+        <span>Job Detail: #{job.id}</span>
         <button className="btn btn-sm btn-secondary" onClick={onClose}>✕ Close</button>
       </div>
       <div className="card-body">
@@ -236,7 +236,7 @@ export function SourcesPage() {
                       <tbody>
                         {jobsPage.data.map(job => (
                           <tr key={job.id} className="row-link" onClick={() => setSelectedJobId(job.id)}>
-                            <td className="mono text-sm">{job.id.slice(0, 10)}…</td>
+                            <td className="mono text-sm">{job.id}</td>
                             <td>{job.type}</td>
                             <td>{job.source ?? '—'}</td>
                             <td><StatusBadge value={job.status} type="job" /></td>

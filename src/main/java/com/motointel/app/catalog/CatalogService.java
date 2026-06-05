@@ -61,9 +61,14 @@ public class CatalogService {
 
     public Page<ModelDto> listModels(Long manufacturerId, String q, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<MotorcycleModel> models = modelRepo.search(manufacturerId, blankToNull(q), pageable);
+        Page<MotorcycleModel> models = modelRepo.search(manufacturerId, toLikePattern(q), pageable);
         Map<Long, String> manufacturerNames = manufacturerNameMap();
         return models.map(m -> lightModel(m, manufacturerNames.get(m.getManufacturerId())));
+    }
+
+    /** Pre-lowercased {@code %term%} LIKE pattern, or null when there is no search term. */
+    private static String toLikePattern(String q) {
+        return (q == null || q.isBlank()) ? null : "%" + q.toLowerCase() + "%";
     }
 
     public List<ModelDto> search(String q) {
