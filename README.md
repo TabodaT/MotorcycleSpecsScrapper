@@ -2,8 +2,8 @@
 
 A self-contained web app that combines a **motorcycle spec catalog** with **second-hand market
 listings**, automatically matches listings to catalog models, and surfaces pricing & lifecycle
-analytics. It runs entirely locally with **one command** and ships with demo data so every page is
-populated on first boot — **no code or config edits required**.
+analytics. It runs entirely locally with **one command**. It ships **empty** — populate the catalog
+by running the catalog ingest (one click), and add market listings via CSV import.
 
 It's two domains in one app:
 
@@ -39,19 +39,34 @@ Then open: **http://localhost:18080**
 
 The first build compiles the React SPA (`node:20`), builds & tests the Spring Boot jar
 (`eclipse-temurin:21-jdk`), and runs it on a slim JRE against PostgreSQL 16. First boot runs Flyway
-migrations, which **create the schema and seed demo data** automatically.
+migrations, which **create the schema** and register the configured sources (the catalog source plus
+the market sources). No catalog or market content is seeded — the app starts empty.
 
 > Ports `18080` (app) and `55432` (Postgres) are non-default on purpose so they don't collide with
 > common local services. See **Changing ports** below.
 
-## Demo data
+## Populating the catalog
 
-Demo data is **seeded automatically by Flyway** on first boot (zero network access required): 6
-manufacturers, 19 models with specs/aliases/images, and 32 market listings spread across ~10 weeks
-with a realistic mix of match statuses and lifecycle states. **You don't need to do anything** — just
-open the app.
+The catalog is filled by scraping `motorcyclespecs.co.za` on demand:
 
-To re-seed from scratch, reset the database (see **Reset** below).
+1. Open **Sources & Jobs** (`/sources`).
+2. On the `motorcyclespecs.co.za` row, click **Run Ingest**.
+3. A `catalog_ingest` job starts and runs **in the background** — watch its live counts
+   (discovered / fetched / parsed / inserted) in the Jobs table; click the job for per-error detail.
+
+The crawl mirrors the original tool: it walks every manufacturer page and every model on it.
+
+- **First run** (empty DB): fetches **all** models the source lists — this is a long crawl
+  (thousands of pages at the configured rate limit), so let it run.
+- **Later runs**: fetch **only models that are new** since the last run (already-ingested model URLs
+  are skipped), so re-running is fast and just tops up the catalog.
+
+Enabling the source (the **Enabled** toggle) additionally lets the daily scheduler run the same
+incremental top-up automatically; manual **Run Ingest** works whether or not the source is enabled.
+
+Tuning (env vars, all optional): `CATALOG_RATE_LIMIT_RPS` (default `1`),
+`CATALOG_MAX_MODELS_PER_RUN` (default `0` = unlimited), `CATALOG_MAX_PAGES_PER_MANUFACTURER`
+(default `50`).
 
 ## Importing a CSV
 
@@ -71,8 +86,8 @@ scraping — see **Known limitations**).
 3. Upload it. You'll see how many rows were **inserted / updated / failed**, plus per-row errors.
    New/changed listings are **auto-matched** to catalog models immediately.
 
-A ready-to-upload sample is included: **[`demo_listings.csv`](./demo_listings.csv)** (its rows use
-external ids distinct from the seed, so uploading genuinely inserts new listings).
+A ready-to-upload sample is included: **[`demo_listings.csv`](./demo_listings.csv)** — a quick way to
+get listings into an otherwise empty app so the Market, Match Review, and Analytics pages light up.
 
 Dedupe key: `(source, external_id)` when `external_id` is present, otherwise `(source,
 normalized_url)`. Re-importing the same listing updates it (and appends a price-history row if the
@@ -129,7 +144,7 @@ Inside the compose network the app always reaches Postgres at `db:5432` (not the
 ## Reset
 
 ```bash
-docker compose down -v      # removes the named volumes (DB + storage) → full reset + re-seed on next up
+docker compose down -v      # removes the named volumes (DB + storage) → back to an empty app on next up
 docker compose down         # stops containers but KEEPS data (it survives the restart)
 ```
 
@@ -144,7 +159,8 @@ while the stack is up.
 
 - **Live catalog scraping is best-effort.** The catalog source (`motorcyclespecs.co.za`) is ingested
   with jsoup behind a snapshot-first pipeline; if the site is unreachable or its layout changed, the
-  job completes **`completed_with_errors`** (visible in the UI) and the app keeps working on seed data.
+  job completes **`completed_with_errors`** (visible in the UI) with per-page errors, and the rest of
+  the catalog that did parse is still ingested.
 - **OLX / Facebook Marketplace live ingestion is disabled by design.** Their terms don't permit
   automated scraping, so OLX is wired as a **CSV import** source (compliance `needs_review`) and
   Facebook is a **blocked** future source. Use the **CSV Import** flow for market data.

@@ -52,7 +52,8 @@ public class SourceService {
         return all;
     }
 
-    @Transactional
+    // Intentionally NOT @Transactional: jobService.start() must commit the job row in its own
+    // transaction before CatalogCrawler.runAsync() loads it on a background thread.
     public IngestStartedDto ingest(long unifiedId) {
         if (SourceIds.isMarket(unifiedId)) {
             long marketId = SourceIds.marketId(unifiedId);

@@ -54,6 +54,8 @@ app:
     user-agent: ${SCRAPER_USER_AGENT:MotoIntelBot/1.0 (+local)}
     http-timeout-ms: ${HTTP_TIMEOUT_MS:15000}
     rate-limit-rps: ${CATALOG_RATE_LIMIT_RPS:1}
+    max-models-per-run: ${CATALOG_MAX_MODELS_PER_RUN:0}
+    max-pages-per-manufacturer: ${CATALOG_MAX_PAGES_PER_MANUFACTURER:50}
   listing:
     removed-threshold-n: ${LISTING_REMOVED_THRESHOLD_N:2}
     likely-sold-days-x: ${LISTING_LIKELY_SOLD_DAYS_X:7}

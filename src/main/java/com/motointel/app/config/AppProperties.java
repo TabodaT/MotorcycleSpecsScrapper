@@ -36,12 +36,22 @@ public class AppProperties {
         private String userAgent = "MotoIntelBot/1.0 (+local)";
         private int httpTimeoutMs = 15000;
         private int rateLimitRps = 1;
+        /** Safety cap on models ingested per run; 0 (or negative) = unlimited (crawl the whole catalog). */
+        private int maxModelsPerRun = 0;
+        /** Safety cap on paginated pages followed per manufacturer (guards against pagination loops). */
+        private int maxPagesPerManufacturer = 50;
         public String getUserAgent() { return userAgent; }
         public void setUserAgent(String userAgent) { this.userAgent = userAgent; }
         public int getHttpTimeoutMs() { return httpTimeoutMs; }
         public void setHttpTimeoutMs(int httpTimeoutMs) { this.httpTimeoutMs = httpTimeoutMs; }
         public int getRateLimitRps() { return rateLimitRps; }
         public void setRateLimitRps(int rateLimitRps) { this.rateLimitRps = rateLimitRps; }
+        public int getMaxModelsPerRun() { return maxModelsPerRun; }
+        public void setMaxModelsPerRun(int maxModelsPerRun) { this.maxModelsPerRun = maxModelsPerRun; }
+        public int getMaxPagesPerManufacturer() { return maxPagesPerManufacturer; }
+        public void setMaxPagesPerManufacturer(int maxPagesPerManufacturer) {
+            this.maxPagesPerManufacturer = maxPagesPerManufacturer;
+        }
     }
 
     public static class Listing {
