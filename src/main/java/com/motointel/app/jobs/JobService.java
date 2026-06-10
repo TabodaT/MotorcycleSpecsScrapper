@@ -27,13 +27,16 @@ public class JobService {
     private final IngestionJobErrorRepository errorRepo;
     private final CatalogSourceRepository catalogSourceRepo;
     private final MarketSourceRepository marketSourceRepo;
+    private final JobCancellationRegistry cancellationRegistry;
 
     public JobService(IngestionJobRepository jobRepo, IngestionJobErrorRepository errorRepo,
-                      CatalogSourceRepository catalogSourceRepo, MarketSourceRepository marketSourceRepo) {
+                      CatalogSourceRepository catalogSourceRepo, MarketSourceRepository marketSourceRepo,
+                      JobCancellationRegistry cancellationRegistry) {
         this.jobRepo = jobRepo;
         this.errorRepo = errorRepo;
         this.catalogSourceRepo = catalogSourceRepo;
         this.marketSourceRepo = marketSourceRepo;
+        this.cancellationRegistry = cancellationRegistry;
     }
 
     @Transactional
@@ -69,6 +72,20 @@ public class JobService {
         job.setStatus(status);
         job.setFinishedAt(Instant.now());
         return jobRepo.save(job);
+    }
+
+    /**
+     * Requests cancellation of a running job. Returns the job's current state.
+     * @throws ApiException 404 if the job does not exist, 409 if it is not running.
+     */
+    @Transactional(readOnly = true)
+    public JobDto cancel(Long id) {
+        IngestionJob job = jobRepo.findById(id).orElseThrow(() -> ApiException.notFound("Job not found: " + id));
+        if (!JobVocab.STATUS_RUNNING.equals(job.getStatus())) {
+            throw ApiException.conflict("Job is not running: " + id);
+        }
+        cancellationRegistry.requestCancel(id);
+        return toDto(job, List.of());
     }
 
     @Transactional(readOnly = true)

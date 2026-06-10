@@ -6,6 +6,7 @@ import com.motointel.app.dto.JobDto;
 import com.motointel.app.jobs.JobService;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,5 +36,10 @@ public class JobController {
     @GetMapping("/{id}")
     public ApiResponse<JobDto> get(@PathVariable Long id) {
         return ApiResponse.ok(jobService.getJob(id));
+    }
+
+    @PostMapping("/{id}/cancel")
+    public ApiResponse<JobDto> cancel(@PathVariable Long id) {
+        return ApiResponse.ok(jobService.cancel(id));
     }
 }

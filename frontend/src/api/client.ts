@@ -163,6 +163,10 @@ export async function getJob(id: string): Promise<JobDto> {
   return apiFetch<JobDto>(`/api/jobs/${id}`);
 }
 
+export async function cancelJob(id: string | number): Promise<JobDto> {
+  return apiFetch<JobDto>(`/api/jobs/${id}/cancel`, { method: 'POST' });
+}
+
 // ─── Market Listings ─────────────────────────────────────────────────────────
 
 export interface ListingListParams {

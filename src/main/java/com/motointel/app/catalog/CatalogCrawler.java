@@ -8,6 +8,7 @@ import com.motointel.app.config.AsyncConfig;
 import com.motointel.app.domain.CatalogSource;
 import com.motointel.app.domain.IngestionJob;
 import com.motointel.app.domain.JobVocab;
+import com.motointel.app.jobs.JobCancellationRegistry;
 import com.motointel.app.jobs.JobService;
 import com.motointel.app.repo.CatalogSourcePageRepository;
 import com.motointel.app.repo.CatalogSourceRepository;
@@ -48,17 +49,19 @@ public class CatalogCrawler {
     private final CatalogLinkExtractor extractor;
     private final CatalogPagePersister persister;
     private final JobService jobService;
+    private final JobCancellationRegistry cancellationRegistry;
     private final AppProperties props;
 
     public CatalogCrawler(CatalogSourceRepository sourceRepo, CatalogSourcePageRepository pageRepo,
                           IngestionJobRepository jobRepo, CatalogLinkExtractor extractor,
-                          CatalogPagePersister persister, JobService jobService, AppProperties props) {
+                          CatalogPagePersister persister, JobService jobService, JobCancellationRegistry cancellationRegistry, AppProperties props) {
         this.sourceRepo = sourceRepo;
         this.pageRepo = pageRepo;
         this.jobRepo = jobRepo;
         this.extractor = extractor;
         this.persister = persister;
         this.jobService = jobService;
+        this.cancellationRegistry = cancellationRegistry;
         this.props = props;
     }
 
@@ -92,6 +95,12 @@ public class CatalogCrawler {
 
             outer:
             for (ManufacturerLink manufacturer : manufacturers) {
+                if (cancellationRegistry.isCancelled(jobId)) {
+                    log.info("Catalog crawl: cancellation requested, stopping before manufacturer {}", manufacturer.name());
+                    jobService.save(job);
+                    jobService.finish(job, JobVocab.STATUS_CANCELLED);
+                    return;
+                }
                 List<DiscoveredModel> models;
                 try {
                     models = collectModels(manufacturer);
@@ -103,6 +112,12 @@ public class CatalogCrawler {
                 }
 
                 for (DiscoveredModel dm : models) {
+                    if (cancellationRegistry.isCancelled(jobId)) {
+                        log.info("Catalog crawl: cancellation requested, stopping at model {}", dm.url());
+                        jobService.save(job);
+                        jobService.finish(job, JobVocab.STATUS_CANCELLED);
+                        return;
+                    }
                     if (!seenThisRun.add(dm.url())) {
                         continue; // same model linked under two manufacturers in this run
                     }

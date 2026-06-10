@@ -13,6 +13,7 @@ public final class JobVocab {
     public static final String STATUS_COMPLETED = "completed";
     public static final String STATUS_COMPLETED_WITH_ERRORS = "completed_with_errors";
     public static final String STATUS_FAILED = "failed";
+    public static final String STATUS_CANCELLED = "cancelled";
 
     private JobVocab() {}
 }

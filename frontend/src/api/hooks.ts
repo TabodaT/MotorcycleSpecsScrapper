@@ -99,6 +99,17 @@ export function useJob(id: string) {
   });
 }
 
+export function useCancelJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string | number) => client.cancelJob(id),
+    onSuccess: (_data, id) => {
+      qc.invalidateQueries({ queryKey: ['jobs'] });
+      qc.invalidateQueries({ queryKey: ['jobs', id] });
+    },
+  });
+}
+
 // ─── Market Listings ─────────────────────────────────────────────────────────
 
 export function useListings(params: ListingListParams = {}) {

@@ -1,11 +1,31 @@
 import { useState } from 'react';
-import { useSources, useJobs, usePatchSource, useIngestSource, useJob } from '../api/hooks';
+import { useSources, useJobs, usePatchSource, useIngestSource, useJob, useCancelJob } from '../api/hooks';
 import { LoadingBlock } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { StatusBadge } from '../components/StatusBadge';
 import { Pagination } from '../components/Pagination';
 import { EmptyState } from '../components/EmptyState';
 import { Card } from '../components/Card';
+
+
+function StopButton({ jobId, status }: { jobId: string; status: string }) {
+  const cancel = useCancelJob();
+  if (status !== 'running') return null;
+  const pending = cancel.isPending;
+  return (
+    <button
+      className="btn btn-sm btn-danger"
+      disabled={pending}
+      onClick={(e) => {
+        e.stopPropagation();
+        cancel.mutate(jobId);
+      }}
+      title="Stop this running job"
+    >
+      {pending ? 'Stopping…' : 'Stop'}
+    </button>
+  );
+}
 
 const PAGE_SIZE = 20;
 
@@ -22,9 +42,12 @@ function JobDetailPanel({ jobId, onClose }: { jobId: string; onClose: () => void
 
   return (
     <div className="card" style={{ marginTop: 20 }}>
-      <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span>Job Detail: #{job.id}</span>
-        <button className="btn btn-sm btn-secondary" onClick={onClose}>✕ Close</button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <StopButton jobId={job.id} status={job.status} />
+          <button className="btn btn-sm btn-secondary" onClick={onClose}>✕ Close</button>
+        </div>
       </div>
       <div className="card-body">
         <div className="detail-grid" style={{ marginBottom: 16 }}>
@@ -231,6 +254,7 @@ export function SourcesPage() {
                           <th>Started</th>
                           <th>Finished</th>
                           <th>Summary</th>
+                          <th>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -243,6 +267,9 @@ export function SourcesPage() {
                             <td className="text-muted text-sm">{formatDate(job.startedAt)}</td>
                             <td className="text-muted text-sm">{formatDate(job.finishedAt)}</td>
                             <td className="text-sm truncate" title={job.errorSummary}>{job.errorSummary ?? '—'}</td>
+                            <td onClick={(e) => e.stopPropagation()}>
+                              <StopButton jobId={job.id} status={job.status} />
+                            </td>
                           </tr>
                         ))}
                       </tbody>
